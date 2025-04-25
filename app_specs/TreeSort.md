@@ -20,16 +20,16 @@ It takes the following parameters:
 | input_fasta_data | Input FASTA data | string | | |
 | input_fasta_file_id | Input FASTA file ID | wsid | | |
 | input_source | Input source | fasta_data, fasta_file_id | :heavy_check_mark: | fasta_file_id |
+| is_time_scaled | Is time scaled? | boolean | | false |
 | match_on_epi  | Match on "EPI_ISL_XXX" field | boolean |  |  |
 | match_on_regex | Match on RegEx | string (regex) |  | ??? |
-| match_on_strain | Match on strain? | boolean | ??? | |
+| match_on_strain | Match on strain? | boolean |  | |
 | method | Method | local, mincut | :heavy_check_mark: | local |
 | no_collapse | No collapse | boolean |  | ??? |
 | output_path | Output path | string | ??? | |
 | p_value | P-value | float | | 0.001 |
 | ref_segment | Reference Segment | string | :heavy_check_mark: | HA |
 | segments | Segments | string | :heavy_check_mark: | All segments |
-| timetree | Time-tree | boolean | | |
 
 
 
