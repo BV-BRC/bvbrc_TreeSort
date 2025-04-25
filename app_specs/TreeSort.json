@@ -1,0 +1,172 @@
+{
+   "id": "TreeSort",
+   "script": "App-TreeSort",
+   "label": "Virus reassortment inference software.",
+   "description": "TreeSort infers both recent and ancestral reassortment events along the branches of a phylogenetic tree of a fixed genomic segment.",
+   "default_memory": "100G",
+   "parameters": [
+      {
+         "id": "clades_path",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Clades path",
+         "desc": "Path to an output file, where clades with evidence of reassortment will be saved",
+         "type": "string"
+      },  
+      {
+         "id": "descriptor_path",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Path to the descriptor file",
+         "desc": "The descriptor file provides paths to the alignments and phylogenetic trees for different virus segments",
+         "type": "string"
+      },
+      {
+         "id": "deviation",
+         "allow_multiple": false,
+         "required": 0,
+         "default": 2.0,
+         "label": "Deviation",
+         "desc": "Maximum deviation from the estimated substitution rate within each segment. The substitution rate on a particular tree branch is allowed to be twice as high or twice as low as the estimated rate.",
+         "type": "float"
+      },
+      {
+         "id": "equal_rates",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Equal rates",
+         "desc": "Do not estimate molecular clock rates for different segments: assume equal rates. Ignored if timetree is specified",
+         "type": "boolean"
+      },
+      {
+         "id": "inference_type",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "IQ-Tree",
+         "label": "Inference type",
+         "desc": "Should the reference phylogeny be built using FastTree (fast, low quality) or IQ-Tree (slower, high quality)?",
+         "type": "enum",
+         "enum": ["FastTree", "IQ-Tree"]
+      },
+      {
+         "id": "input_fasta_data",
+         "label": "Input FASTA",
+         "required": 0,
+         "default": null,
+         "desc": "The input FASTA sequence",
+         "type": "string"
+      },
+      {
+         "id": "input_fasta_file_id",
+         "label": "Input FASTA file ID",
+         "required": 0,
+         "default": null,
+         "desc": "The ID of a FASTA input sequence in the workspace",
+         "type": "wsid"
+      },
+      {
+         "id": "input_source",
+         "allow_multiple": false,
+         "required": 1,
+         "default": "fasta_file_id",
+         "label": "Input source",
+         "desc": "Is the input a FASTA sequence or the ID of a FASTA file in the workspace?",
+         "enum": ["fasta_data", "fasta_file_id"],
+         "type": "enum"
+      },
+      {
+         "id": "is_time_scaled",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Is time scaled?",
+         "desc": "Indicates that the reference tree is time-scaled (e.g., through TreeTime)",
+         "type": "boolean"
+      },
+      {
+         "id": "match_on_epi",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Match on \"EPI_ISL_XXX\" field",
+         "desc": "Similar to \"match on strain\", but here segments are matched based on the \"EPI_ISL_XXX\" field (if present in deflines)",
+         "type": "boolean"
+      }, 
+      {
+         "id": "match_on_regex",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Match on RegEx",
+         "desc": "Provide your own custom regex to match the segments across the alignments.",
+         "type": "string"
+      }, 
+      {
+         "id": "match_on_strain",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Match on strain?",
+         "desc": "Match the names (defined in FASTAs) across the segments based on the strain name. E.g., \"A/Texas/32/2021\" or \"A/swine/A0229832/Iowa/2021\". Works for flu A, B, C, and D. This way no preprocessing is needed to standardize the names before the analysis.",
+         "type": "boolean"
+      }, 
+      {
+         "id": "method",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "local",
+         "label": "Method",
+         "desc": "Methods are \"local\" (default) or \"mincut\". The \"mincut\" method always determines the most parsimonious reassortment placement even in ambiguous circumstances",
+         "enum": ["local", "mincut"],
+         "type": "enum"
+      }, 
+      {
+         "id": "no_collapse",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "No collapse",
+         "desc": "Do not collapse near-zero length branches into multifurcations (by default, TreeSort collapses all branches shorter than 1e-7 and then optimizes the multifurcations).",
+         "type": "boolean"
+      }, 
+      {
+         "id": "output_path",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Output path",
+         "desc": "Path to the output file (tree will be saved in nexus format)",
+         "type": "string"
+      }, 
+      {
+         "id": "p_value",
+         "allow_multiple": false,
+         "required": 0,
+         "default": 0.001,
+         "label": "P-value",
+         "desc": "The cutoff p-value for the reassortment tests: the default is 0.001 (0.1 percent). You may want to decrease or increase this parameter depending on how stringent you want the analysis to be.",
+         "type": "float"
+      },
+      {
+         "id": "ref_segment",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "HA",
+         "label": "Reference Segment",
+         "desc": "The reference segment",
+         "type": "string"
+      },
+      {
+         "id": "segments",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Segments",
+         "desc": "The segments to be analyzed. If you want to analyze all segments, leave this field empty.",
+         "type": "string"
+      }
+   ]
+}
