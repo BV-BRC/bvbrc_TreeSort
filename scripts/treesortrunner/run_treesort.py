@@ -1,7 +1,7 @@
 
 import argparse
-from .common import safeTrim
-from .treesortrunner import TreeSortRunner
+from treesortrunner.common import InputParameter, safeTrim
+from treesortrunner.treesortrunner import TreeSortRunner
 import json
 import os
 import sys
@@ -16,11 +16,10 @@ def main(argv=None):
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
    parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file for the job", required=True)
-   parser.add_argument("-o", "--output-dir-name", dest="output_dir_name", help="The output directory name (defaults to current directory)", required=False, default=".")
-
+   
    args = parser.parse_args()
 
-   # Validate the job filename
+   # Validate the job filename parameter.
    job_filename = safeTrim(args.job_filename)
    if len(job_filename) == 0:
       traceback.print_exc(file=sys.stderr)
@@ -35,40 +34,26 @@ def main(argv=None):
 
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
-      sys.stderr.write(f"Invalid job file:\n {e}\n")
+      sys.stderr.write(f"Invalid job file:\n{e}\n")
       sys.exit(-1)
 
-   
-   # For debugging   
-   #print(job_data)
-
-   # Validate the job data
-   if not TreeSortRunner.is_job_data_valid(job_data):
-      sys.exit(-1)
-
-   # Validate the output directory name
-   output_dir_name = safeTrim(args.output_dir_name)
-   if len(output_dir_name) == 0:
+   try:
+      # Create a TreeSortRunner instance
+      runner = TreeSortRunner(job_data)
+      
+   except Exception as e:
       traceback.print_exc(file=sys.stderr)
-      sys.stderr.write("Invalid output directory name parameter\n")
+      sys.stderr.write(f"Unable to create an instance of TreeSortRunner:\n{e}\n")
       sys.exit(-1)
-
-   # Create the output directory if it doesn't exist.
-   output_dir_name = os.path.abspath(output_dir_name)
-   if not os.path.exists(output_dir_name):
-      os.mkdir(output_dir_name)
-
-   # Create a TreeSortRunner instance
-   runner = TreeSortRunner(job_data, output_dir_name)
-
-   # Process the input file
+   
+   # Prepare the input file
    if not runner.prepare_input_file():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in prepare_input_file\n")
       sys.exit(-1)
 
    # Go to the output directory.
-   os.chdir(output_dir_name)
+   os.chdir(job_data[InputParameter.OutputPath])
 
    # Prepare the dataset
    if not runner.prepare_dataset():

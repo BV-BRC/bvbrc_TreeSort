@@ -6,7 +6,7 @@
    "inference_type": "FastTree",
    "input_fasta_data": null,
    "input_fasta_file": "test/swine_H1_HANA.fasta",
-   "input_fasta_file_id": "TODO",
+   "input_fasta_file_id": "/testUser@bvbrc/home/TreeSort/swine_H1_HANA.fasta",
    "input_source": "fasta_file",
    "is_time_scaled": false,
    "match_on_epi": false,
