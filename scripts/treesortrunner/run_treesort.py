@@ -40,7 +40,7 @@ def main(argv=None):
    try:
       # Create a TreeSortRunner instance
       runner = TreeSortRunner(job_data)
-      
+
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write(f"Unable to create an instance of TreeSortRunner:\n{e}\n")
@@ -52,8 +52,13 @@ def main(argv=None):
       sys.stderr.write("An error occurred in prepare_input_file\n")
       sys.exit(-1)
 
+   # Create the output directory if it doesn't exist.
+   output_path = os.path.abspath(job_data[InputParameter.OutputPath])
+   if not os.path.exists(output_path):
+      os.mkdir(output_path)
+
    # Go to the output directory.
-   os.chdir(job_data[InputParameter.OutputPath])
+   os.chdir(output_path)
 
    # Prepare the dataset
    if not runner.prepare_dataset():

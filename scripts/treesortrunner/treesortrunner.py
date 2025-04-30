@@ -28,7 +28,7 @@ class TreeSortRunner:
    job_data: dict = None
 
    # The full path to the output directory.
-   #output_path: str = None
+   output_path: str = None
    
 
    # C-tor
@@ -43,39 +43,45 @@ class TreeSortRunner:
       # Set and validate the job data.
       self.job_data = job_data
       if not self.job_data:
-         raise ValueError("No job data was provided")
-      elif not TreeSortRunner.is_job_data_valid(self.job_data):
-         raise ValueError("The job data is invalid")
+         raise ValueError("No job data was provided to the constructor")
+      
+      if not TreeSortRunner.is_job_data_valid(self.job_data):
+         raise ValueError("Job data in the constructor is invalid")
+      
+      # Set the output path's absolute path.
+      self.output_path = os.path.abspath(self.job_data[InputParameter.OutputPath.value])
       
       
    @staticmethod
    def is_job_data_valid(job_data: dict) -> bool:
+
+      sys.stdout.write(str(job_data))
 
       try:
          if not job_data or not isinstance(job_data, dict) or len(job_data) == 0:
             raise Exception("job_data is empty")
          
          # Validate the input_source.
-         if job_data[InputParameter.InputSource.value] not in InputSource:
+         if job_data[InputParameter.InputSource.value] not in [i.value for i in InputSource]:
             raise ValueError("job_data.input_source is not a valid input source") 
 
          # If input_source is fasta_data, make sure an input_fasta_data value was provided.
          if job_data[InputParameter.InputSource.value] == InputSource.FastaData.value and \
-         not not job_data[InputParameter.InputFastaData]:
+         not job_data[InputParameter.InputFastaData]:
             raise ValueError("The input FASTA data is invalid")
          
          # If input_source is fasta_file, make sure an input_fasta_file value was provided.
          if job_data[InputParameter.InputSource.value] == InputSource.FastaFile.value and \
-         not not job_data[InputParameter.InputFastaFile]:
+         not job_data[InputParameter.InputFastaFile]:
             raise ValueError("The input FASTA file is invalid")
          
          # If input_source is fasta_file_id, make sure an input_fasta_file_id value was provided.
          if job_data[InputParameter.InputSource.value] == InputSource.FastaFileID.value and \
-         not not job_data[InputParameter.InputFastaFileID]:
+         not job_data[InputParameter.InputFastaFileID]:
             raise ValueError("The input FASTA file ID is invalid")
 
          # Validate the method
-         if job_data[InputParameter.Method] not in Method:
+         if job_data[InputParameter.Method] not in [m.value for m in Method]:
             raise ValueError("job_data.method is not a valid method") 
 
          # Validate the output path.
@@ -97,7 +103,7 @@ class TreeSortRunner:
                   raise ValueError(f"Invalid segment: {segment}")
 
       except Exception as e:
-         sys.stderr.write(f"Job data is invalid:\n {e}\n")
+         sys.stderr.write(f"Invalid job data:\n {e}\n")
          return False
 
       return True
@@ -132,11 +138,13 @@ class TreeSortRunner:
             cmd.append(refSegment)
 
          # The output path
-         cmd.append(self.job_data[InputParameter.OutputPath.value])
+         cmd.append(self.output_path)
 
-         # TODO: uncomment
-         # result = subprocess.check_call(cmd, shell=False)
-         print(f"{" ".join(cmd)}\n\n")
+         # TEST
+         print(f"{' '.join(cmd)}\n\n")
+
+         result = subprocess.check_call(cmd, shell=False)
+         print(f"Result = {str(result)}\n\n")
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
@@ -184,6 +192,9 @@ class TreeSortRunner:
 
          else:
             raise ValueError(f"Invalid input source: {input_source}")
+
+         # Set the input filename and include its full path.
+         self.input_filename = os.path.abspath(self.input_filename)
 
          # Validate the input FASTA file.
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
@@ -261,7 +272,7 @@ class TreeSortRunner:
 
          # TODO: uncomment
          # result = subprocess.check_call(cmd, shell=False)
-         print(f"{" ".join(cmd)}\n\n")
+         print(f"{' '.join(cmd)}\n\n")
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
