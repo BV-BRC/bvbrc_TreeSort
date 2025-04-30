@@ -1,5 +1,5 @@
 
-from scripts.treesortrunner.common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, InputParameter, INVALID_FASTA_CHARS, \
+from .common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, InputParameter, INVALID_FASTA_CHARS, \
    safeTrim, ScriptOption, VALID_SEGMENTS
 import re
 import os

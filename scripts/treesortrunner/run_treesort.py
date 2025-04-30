@@ -1,7 +1,7 @@
 
 import argparse
-from scripts.treesortrunner.common import safeTrim
-from scripts.treesortrunner.treesortrunner import TreeSortRunner
+from .common import safeTrim
+from .treesortrunner import TreeSortRunner
 import json
 import os
 import sys
