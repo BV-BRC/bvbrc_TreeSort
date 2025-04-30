@@ -112,27 +112,31 @@ class TreeSortRunner:
          # Example usage: ./prepare_dataset.sh --segments "HA,NA" segments.fasta HA myoutdir
          cmd = ["prepare_dataset.sh"]
 
+         # Should --fast be added?
          inference_type = self.job_data[InputParameter.InferenceType.value]
          if (inference_type and inference_type == InferenceType.FastTree.value):
             cmd.append(ScriptOption.FastTree.value)
 
+         # The segments (optional)
          segments = self.job_data[InputParameter.Segments.value]
          if segments:
             cmd.append(ScriptOption.Segments.value)
             cmd.append(segments)
 
-         cmd.append(self.input_path)
+         # The input FASTA file.
+         cmd.append(self.input_filename)
 
+         # The reference segment
          refSegment = self.job_data[InputParameter.RefSegment.value]
          if refSegment:
-            # TODO: validate refSegment
             cmd.append(refSegment)
 
-         cmd.append(self.output_path)
+         # The output path
+         cmd.append(self.job_data[InputParameter.OutputPath.value])
 
          # TODO: uncomment
          # result = subprocess.check_call(cmd, shell=False)
-         print(f"{"".join(cmd)}\n\n")
+         print(f"{" ".join(cmd)}\n\n")
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
@@ -216,40 +220,48 @@ class TreeSortRunner:
       try:
          cmd = ["treesort"]
 
-         # Always add the descriptor path.
-         cmd.append(ScriptOption.DescriptorPath)
-         cmd.append(self.job_data[InputParameter.DescriptorPath])
+         # The clades output path
+         clades_path = safeTrim(self.job_data[InputParameter.CladesPath.value])
+         if len(clades_path) > 0:
+            cmd.append(ScriptOption.CladesPath.value)
+            cmd.append(clades_path)
+
+         # The descriptor path.
+         descriptor_path = safeTrim(self.job_data[InputParameter.DescriptorPath.value])
+         if len(descriptor_path) > 0:
+            cmd.append(ScriptOption.DescriptorPath.value)
+            cmd.append(descriptor_path)
 
          # The "match on" options are mutually exclusive.
-         if self.job_data[InputParameter.MatchOnStrain]:
-            cmd.append(ScriptOption.MatchOnStrain)
+         if self.job_data[InputParameter.MatchOnStrain.value]:
+            cmd.append(ScriptOption.MatchOnStrain.value)
 
-         elif self.job_data[InputParameter.MatchOnEPI]:
-            cmd.append(ScriptOption.MatchOnEPI)
+         elif self.job_data[InputParameter.MatchOnEPI.value]:
+            cmd.append(ScriptOption.MatchOnEPI.value)
 
-         elif self.job_data[InputParameter.MatchOnRegex]:
-            cmd.append(ScriptOption.MatchOnRegex)
-            cmd.append(self.job_data[InputParameter.MatchOnRegex])
+         elif self.job_data[InputParameter.MatchOnRegex.value]:
+            cmd.append(ScriptOption.MatchOnRegex.value)
+            cmd.append(self.job_data[InputParameter.MatchOnRegex.value])
 
          # No collapse
-         if self.job_data[InputParameter.NoCollapse]:
-            cmd.append(ScriptOption.NoCollapse)
+         if self.job_data[InputParameter.NoCollapse.value]:
+            cmd.append(ScriptOption.NoCollapse.value)
 
           # Always add the output path.
-         cmd.append(ScriptOption.OutputPath)
-         cmd.append(self.job_data[InputParameter.OutputPath])
+         cmd.append(ScriptOption.OutputPath.value)
+         cmd.append(self.job_data[InputParameter.OutputPath.value])
 
          # Equal rates
-         if self.job_data[InputParameter.EqualRates]:
-            cmd.append(ScriptOption.EqualRates)
+         if self.job_data[InputParameter.EqualRates.value]:
+            cmd.append(ScriptOption.EqualRates.value)
 
          # Is time scaled (timetree)
-         if self.job_data[InputParameter.IsTimeScaled]:
-            cmd.append(ScriptOption.IsTimeScaled)
+         if self.job_data[InputParameter.IsTimeScaled.value]:
+            cmd.append(ScriptOption.IsTimeScaled.value)
 
          # TODO: uncomment
          # result = subprocess.check_call(cmd, shell=False)
-         print(f"{"".join(cmd)}\n\n")
+         print(f"{" ".join(cmd)}\n\n")
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
