@@ -67,7 +67,7 @@ class TreeSortRunner:
                raise ValueError(f"Invalid segment: {segment}")
             
       except Exception as e:
-         sys.stderr.write("Job data is invalid:\n %s" %(e))
+         sys.stderr.write("Job data is invalid:\n %s" % str(e))
          return False
 
       return True
@@ -104,7 +104,7 @@ class TreeSortRunner:
          print(cmd)
 
       except ValueError as e:
-         sys.stderr.write("Error preparing dataset:\n %s" %(e))
+         sys.stderr.write("Error preparing dataset:\n %s" % str(e))
          return False
          
       return True
@@ -146,7 +146,7 @@ class TreeSortRunner:
                subprocess.check_call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:
-               raise RuntimeError("Error copying FASTA file from workspace:\n %s" %(e))
+               raise RuntimeError("Error copying FASTA file from workspace:\n %s" % str(e))
 
          else:
             raise ValueError(f"Invalid input source: {input_source}")
@@ -172,7 +172,7 @@ class TreeSortRunner:
             f.truncate()
 
       except Exception as e:
-         sys.stderr.write("Error processing input file:\n %s" %(e))
+         sys.stderr.write("Error processing input file:\n %s" % str(e))
          return False
       
       return True
@@ -220,7 +220,7 @@ class TreeSortRunner:
          print(cmd)
 
       except ValueError as e:
-         sys.stderr.write("Error preparing dataset:\n %s" %(e))
+         sys.stderr.write("Error preparing dataset:\n %s" % str(e))
          return False
          
       return True

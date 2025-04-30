@@ -33,7 +33,7 @@ def main(argv=None):
          job_data = json.load(job_file)
 
    except Exception as e:
-      sys.stderr.write("Invalid job file:\n %s" %(e))
+      sys.stderr.write("Invalid job file:\n %s" % str(e))
       sys.exit(-1)
 
    # For debugging   
