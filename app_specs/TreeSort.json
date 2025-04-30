@@ -60,11 +60,19 @@
          "type": "string"
       },
       {
+         "id": "input_fasta_file",
+         "label": "Input FASTA filename",
+         "required": 0,
+         "default": null,
+         "desc": "A FASTA input file",
+         "type": "string"
+      },
+      {
          "id": "input_fasta_file_id",
          "label": "Input FASTA file ID",
          "required": 0,
          "default": null,
-         "desc": "The ID of a FASTA input sequence in the workspace",
+         "desc": "The ID of a FASTA input sequence file in the workspace",
          "type": "wsid"
       },
       {
@@ -74,7 +82,7 @@
          "default": "fasta_file_id",
          "label": "Input source",
          "desc": "Is the input a FASTA sequence or the ID of a FASTA file in the workspace?",
-         "enum": ["fasta_data", "fasta_file_id"],
+         "enum": ["fasta_data", "fasta_file", "fasta_file_id"],
          "type": "enum"
       },
       {

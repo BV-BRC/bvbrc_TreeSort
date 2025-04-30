@@ -71,7 +71,7 @@ sub process_treesort
    -d $stage_dir or mkdir $stage_dir or die "Cannot mkdir $stage_dir: $!";
 
 
-   # DMD: What is this for? $sstring isn't even used!
+   # DMD: What is this for? $sstring isn't used!
    my $data_api = Bio::KBase::AppService::AppConfig->data_api_url;
    my $dat = { data_api => $data_api };
    my $sstring = encode_json($dat);
@@ -82,15 +82,15 @@ sub process_treesort
    #
    # Encode the input parameters as a job description JSON file.
    #
-   my $jdesc = "$cwd/jobdesc.json";
-   open(JDESC, ">", $jdesc) or die "Cannot write $jdesc: $!";
-   print JDESC JSON::XS->new->pretty(1)->encode($params_to_app);
-   close(JDESC);
+   my $job_desc = "$cwd/jobdesc.json";
+   open(JOB_DESC, ">", $job_desc) or die "Cannot write $job_desc: $!";
+   print JOB_DESC JSON::XS->new->pretty(1)->encode($params_to_app);
+   close(JOB_DESC);
 
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort","-o",$work_dir,"--jfile", $jdesc);
+   my @cmd = ("run_treesort","-j", $job_desc,"-o",$work_dir);
 
    warn Dumper (\@cmd, $params_to_app);
 
@@ -124,7 +124,7 @@ sub process_treesort
          my $ok = IPC::Run::run(\@cmd);
          if (!$ok)
          {
-               warn "Error $? copying output with @cmd\n";
+            warn "Error $? copying output with @cmd\n";
          }
       } 
       closedir($dh);
