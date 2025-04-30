@@ -5,6 +5,7 @@ import re
 import os
 import subprocess
 import sys
+import traceback
 
 # TODO: use https://github.com/BV-BRC/bvbrc_subspecies_classification/blob/master/scripts/run_subspecies_classification.py as an example.
 
@@ -53,21 +54,22 @@ class TreeSortRunner:
             raise Exception("job_data is empty")
          
          # Validate the reference segment and provide a default if not provided.
-         refSegment = safeTrim(job_data[InputParameter.RefSegment])
+         refSegment = safeTrim(job_data[InputParameter.RefSegment.value])
          if not refSegment:
             refSegment = DEFAULT_REF_SEGMENT
 
-         if not refSegment in (segment.value for segment in VALID_SEGMENTS):
+         if not refSegment in VALID_SEGMENTS:
             raise ValueError(f"Invalid reference segment: {refSegment}")
-         
+
          # Validate the segments
          segments = safeTrim(job_data[InputParameter.Segments.value])
-         for segment in segments.split(","):
-            if not segment in (segment.value for segment in VALID_SEGMENTS):
-               raise ValueError(f"Invalid segment: {segment}")
-            
+         if len(segments) > 0:
+            for segment in segments.split(","):
+               if not segment in VALID_SEGMENTS:
+                  raise ValueError(f"Invalid segment: {segment}")
+
       except Exception as e:
-         sys.stderr.write("Job data is invalid:\n %s" % str(e))
+         sys.stderr.write(f"Job data is invalid:\n {e}\n")
          return False
 
       return True
@@ -104,7 +106,7 @@ class TreeSortRunner:
          print(cmd)
 
       except ValueError as e:
-         sys.stderr.write("Error preparing dataset:\n %s" % str(e))
+         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
          return False
          
       return True
@@ -125,7 +127,7 @@ class TreeSortRunner:
                   input_file.write(self.job_data[InputParameter.InputFastaData.value])
 
             except Exception as e:
-               raise IOError("Error copying FASTA data to input file:\n %s" %(e))
+               raise IOError("Error copying FASTA data to input file:\n {e}\n")
 
          elif input_source == InputSource.FastaFile.value:
 
@@ -136,7 +138,7 @@ class TreeSortRunner:
                   raise IOError(f"Invalid input file")
 
             except Exception as e:
-               raise RuntimeError("Error copying FASTA file from workspace:\n %s" %(e))
+               raise RuntimeError("Error copying FASTA file from workspace:\n {e}\n")
             
          elif input_source == InputSource.FastaFileID.value:
 
@@ -150,6 +152,9 @@ class TreeSortRunner:
 
          else:
             raise ValueError(f"Invalid input source: {input_source}")
+
+         # TEST
+         sys.stdout.write(f"self.input_filename = {self.input_filename}, cwd = {os.getcwd()}\n")
 
          # Validate the input file.
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
@@ -172,7 +177,7 @@ class TreeSortRunner:
             f.truncate()
 
       except Exception as e:
-         sys.stderr.write("Error processing input file:\n %s" % str(e))
+         sys.stderr.write(f"Error processing input file:\n {e}\n")
          return False
       
       return True
@@ -220,7 +225,7 @@ class TreeSortRunner:
          print(cmd)
 
       except ValueError as e:
-         sys.stderr.write("Error preparing dataset:\n %s" % str(e))
+         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
          return False
          
       return True
