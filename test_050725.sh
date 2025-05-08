@@ -12,4 +12,4 @@ export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.
 cd /project/scripts
 
 # Run the Python module that runs TreeSort.
-python -m treesortrunner.run_treesort -j ./test/test_job.json
+python -m treesortrunner.run_treesort -j ./test/swine_H1_test/test_job.json
