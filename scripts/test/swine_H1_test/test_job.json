@@ -5,7 +5,7 @@
    "equal_rates": true,
    "inference_type": "FastTree",
    "input_fasta_data": null,
-   "input_fasta_file": "test/swine_H1_HANA.fasta",
+   "input_fasta_file": "test/swine_H1_test/swine_H1_HANA.fasta",
    "input_fasta_file_id": "/testUser@bvbrc/home/TreeSort/swine_H1_HANA.fasta",
    "input_source": "fasta_file",
    "is_time_scaled": false,
@@ -14,7 +14,7 @@
    "match_on_strain": false,
    "method": "local",
    "no_collapse": true,
-   "output_path": "swine_H1_test/output",
+   "output_path": "test/swine_H1_test/output",
    "p_value": 0.001,
    "ref_segment": "HA",
    "segments": null
