@@ -17,6 +17,7 @@ def main(argv=None):
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
    parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file for the job", required=True)
+   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where the scripts will be run", required=True)
    
    args = parser.parse_args()
 
@@ -27,13 +28,20 @@ def main(argv=None):
       sys.stderr.write("Invalid job filename parameter\n")
       sys.exit(-1)
 
+   # Validate the work directory parameter.
+   work_directory = safeTrim(args.work_directory)
+   if len(work_directory) == 0:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("Invalid work directory parameter\n")
+      sys.exit(-1)
+
    # Load job data
    job_data = None
    try:
       with open(job_filename, "r", encoding="utf-8") as job_file:
          job_dict = json.load(job_file)
          job_data = JobData(**job_dict)
-         
+
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write(f"Invalid job file:\n{e}\n")

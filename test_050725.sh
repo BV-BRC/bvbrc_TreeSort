@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# This will be run by the singularity container to:
-# 1) Update the path to include the mount point for the bvbrc_TreeSort_dmd directory.
-# 2) Change to that directory.
-# 3) Run the treesortrunner.run_treesort Python module.
+# This will be called by the singularity container.
 
 # Update the path
 export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.ddempsey/miniconda3/bin/
@@ -12,4 +9,4 @@ export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.
 cd /project/scripts
 
 # Run the Python module that runs TreeSort.
-python -m treesortrunner.run_treesort -j ./test/swine_H1_test/test_job.json
+python -m treesortrunner.run_treesort -j ./test/swine_H1_test/test_job.json -w ./test/swine_H1_test

@@ -25,10 +25,18 @@ class TreeSortRunner:
    # The JSON data for the job.
    job_data: JobData = None
    
+   # The directory where the scripts will be run.
+   work_directory = None
+
 
    # C-tor
-   def __init__(self, job_data: JobData):
+   def __init__(self, job_data: JobData, work_directory: str):
          
+      # Set and validate the work directory.
+      self.work_directory = work_directory
+      if not self.work_directory or len(self.work_directory) < 1:
+         raise ValueError("The work directory parameter is invalid")
+      
       # Determine the base URL.
       if "P3_BASE_URL" in os.environ:
          self.base_url = os.environ["P3_BASE_URL"]
