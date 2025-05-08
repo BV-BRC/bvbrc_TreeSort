@@ -2,6 +2,7 @@
 import argparse
 from treesortrunner.common import InputParameter, safeTrim
 from treesortrunner.treesortrunner import TreeSortRunner
+from job_data import JobData
 import json
 import os
 import sys
@@ -30,8 +31,9 @@ def main(argv=None):
    job_data = None
    try:
       with open(job_filename, "r", encoding="utf-8") as job_file:
-         job_data = json.load(job_file)
-
+         job_dict = json.load(job_file)
+         job_data = JobData(**job_dict)
+         
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write(f"Invalid job file:\n{e}\n")

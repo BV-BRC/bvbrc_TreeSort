@@ -1,4 +1,5 @@
 
+from job_data import JobData
 from treesortrunner.common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, InputParameter, INVALID_FASTA_CHARS, \
    Method, safeTrim, ScriptOption, VALID_SEGMENTS
 import re
@@ -21,18 +22,12 @@ class TreeSortRunner:
    # The name of the FASTA file to use as input. This is specified in job_data.
    input_filename: str = None
 
-   # The full path to the input directory.
-   #input_path: str = None
-
    # The JSON data for the job.
-   job_data: dict = None
-
-   # The full path to the output directory.
-   output_path: str = None
+   job_data: JobData = None
    
 
    # C-tor
-   def __init__(self, job_data):
+   def __init__(self, job_data: JobData):
          
       # Determine the base URL.
       if "P3_BASE_URL" in os.environ:
@@ -40,62 +35,62 @@ class TreeSortRunner:
       else:
          self.base_url = "https://www.bv-brc.org"
 
-      # Set and validate the job data.
-      self.job_data = job_data
-      if not self.job_data:
-         raise ValueError("No job data was provided to the constructor")
+      # Validate the job data.
+      if not job_data:
+         raise ValueError("The job data parameter is invalid")
       
-      if not TreeSortRunner.is_job_data_valid(self.job_data):
+      self.job_data = job_data
+
+      if not TreeSortRunner.is_job_data_valid():
          raise ValueError("Job data in the constructor is invalid")
       
-      # Set the output path's absolute path.
-      #self.output_path = os.path.abspath(self.job_data[InputParameter.OutputPath.value])
-      self.output_path = self.job_data[InputParameter.OutputPath.value]
+      # TODO: Set the output path's absolute path?
+      #self.job_data.output_path = os.path.abspath(self.job_data.output_path)
       
       
-   @staticmethod
-   def is_job_data_valid(job_data: dict) -> bool:
+   # Is the JobData instance valid?
+   def is_job_data_valid(self) -> bool:
 
       try:
-         if not job_data or not isinstance(job_data, dict) or len(job_data) == 0:
+         if not self.job_data or not isinstance(self.job_data, JobData):
             raise Exception("job_data is empty")
          
          # Validate the input_source.
-         if job_data[InputParameter.InputSource.value] not in [i.value for i in InputSource]:
+         if self.job_data.input_source not in [i.value for i in InputSource]:
             raise ValueError("job_data.input_source is not a valid input source") 
 
          # If input_source is fasta_data, make sure an input_fasta_data value was provided.
-         if job_data[InputParameter.InputSource.value] == InputSource.FastaData.value and \
-         not job_data[InputParameter.InputFastaData]:
+         if self.job_data.input_source == InputSource.FastaData.value and \
+         not self.job_data.input_fasta_data:
             raise ValueError("The input FASTA data is invalid")
          
          # If input_source is fasta_file, make sure an input_fasta_file value was provided.
-         if job_data[InputParameter.InputSource.value] == InputSource.FastaFile.value and \
-         not job_data[InputParameter.InputFastaFile]:
+         if self.job_data.input_source == InputSource.FastaFile.value and \
+         not self.job_data.input_fasta_file:
             raise ValueError("The input FASTA file is invalid")
          
          # If input_source is fasta_file_id, make sure an input_fasta_file_id value was provided.
-         if job_data[InputParameter.InputSource.value] == InputSource.FastaFileID.value and \
-         not job_data[InputParameter.InputFastaFileID]:
+         if self.job_data.input_source == InputSource.FastaFileID.value and \
+         not self.job_data.input_fasta_file_id:
             raise ValueError("The input FASTA file ID is invalid")
 
          # Validate the method
-         if job_data[InputParameter.Method] not in [m.value for m in Method]:
+         if self.job_data.method not in [m.value for m in Method]:
             raise ValueError("job_data.method is not a valid method") 
 
          # Validate the output path.
-         if not job_data[InputParameter.OutputPath]:
+         if not self.job_data.output_path:
             raise ValueError("The output path is invalid")
 
          # Validate the reference segment and provide a default if not provided.
-         refSegment = safeTrim(job_data[InputParameter.RefSegment.value])
+         refSegment = safeTrim(self.job_data.ref_segment)
          if not refSegment:
             refSegment = DEFAULT_REF_SEGMENT
          elif not refSegment in VALID_SEGMENTS:
             raise ValueError(f"Invalid reference segment: {refSegment}")
 
          # Validate the segments
-         segments = safeTrim(job_data[InputParameter.Segments.value])
+         segments = safeTrim(self.job_data.segments)
          if len(segments) > 0:
             for segment in segments.split(","):
                if not segment in VALID_SEGMENTS:
@@ -118,26 +113,24 @@ class TreeSortRunner:
          cmd = ["prepare_dataset.sh"]
 
          # Should --fast be added?
-         inference_type = self.job_data[InputParameter.InferenceType.value]
-         if (inference_type and inference_type == InferenceType.FastTree.value):
+         if (self.job_data.inference_type and self.job_data.inference_type == InferenceType.FastTree.value):
             cmd.append(ScriptOption.FastTree.value)
 
          # The segments (optional)
-         segments = self.job_data[InputParameter.Segments.value]
-         if segments:
+         if self.job_data.segments:
             cmd.append(ScriptOption.Segments.value)
-            cmd.append(segments)
+            cmd.append(self.job_data.segments)
 
          # The input FASTA file.
          cmd.append(self.input_filename)
 
          # The reference segment
-         refSegment = self.job_data[InputParameter.RefSegment.value]
+         refSegment = self.job_data.ref_segment
          if refSegment:
             cmd.append(refSegment)
 
          # The output path
-         cmd.append(self.output_path)
+         cmd.append(self.job_data.output_path)
 
          # TEST
          print(f"{' '.join(cmd)}\n\n")
@@ -159,14 +152,14 @@ class TreeSortRunner:
 
       try:
          # The input source determines how the input file is provided.
-         input_source = safeTrim(self.job_data[InputParameter.InputSource.value])
+         input_source = safeTrim(self.job_data.input_source)
 
          if input_source == InputSource.FastaData.value:
          
             # Copy user data to the input file.
             try:
                with open(self.default_input_filename, "w+") as input_file:
-                  input_file.write(self.job_data[InputParameter.InputFastaData.value])
+                  input_file.write(self.job_data.input_fasta_data)
 
             except Exception as e:
                raise IOError(f"Error copying FASTA data to input file:\n {e}\n")
@@ -174,7 +167,7 @@ class TreeSortRunner:
          elif input_source == InputSource.FastaFile.value:
 
             # The input file will be in the local filesystem.
-            self.input_filename = safeTrim(self.job_data[InputParameter.InputFastaFile])
+            self.input_filename = safeTrim(self.job_data.input_fasta_file)
             if len(self.input_filename) == 0:
                raise ValueError("Invalid input filename")
             
@@ -183,7 +176,7 @@ class TreeSortRunner:
             # Fetch the input file from the workspace.
             try:
                # TODO: Is this syntax correct?
-               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data[InputParameter.InputFastaFileID.value]}", self.input_filename]
+               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", self.input_filename]
                subprocess.check_call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:
@@ -231,42 +224,42 @@ class TreeSortRunner:
          cmd = ["treesort"]
 
          # The clades output path
-         clades_path = safeTrim(self.job_data[InputParameter.CladesPath.value])
+         clades_path = safeTrim(self.job_data.clades_path)
          if len(clades_path) > 0:
             cmd.append(ScriptOption.CladesPath.value)
             cmd.append(clades_path)
 
          # The descriptor path.
-         descriptor_path = safeTrim(self.job_data[InputParameter.DescriptorPath.value])
+         descriptor_path = safeTrim(self.job_data.descriptor_path)
          if len(descriptor_path) > 0:
             cmd.append(ScriptOption.DescriptorPath.value)
             cmd.append(descriptor_path)
 
          # The "match on" options are mutually exclusive.
-         if self.job_data[InputParameter.MatchOnStrain.value]:
+         if self.job_data.match_on_strain:
             cmd.append(ScriptOption.MatchOnStrain.value)
 
-         elif self.job_data[InputParameter.MatchOnEPI.value]:
+         elif self.job_data.match_on_epi:
             cmd.append(ScriptOption.MatchOnEPI.value)
 
-         elif self.job_data[InputParameter.MatchOnRegex.value]:
+         elif self.job_data.match_on_regex:
             cmd.append(ScriptOption.MatchOnRegex.value)
-            cmd.append(self.job_data[InputParameter.MatchOnRegex.value])
+            cmd.append(self.job_data.match_on_regex)
 
          # No collapse
-         if self.job_data[InputParameter.NoCollapse.value]:
+         if self.job_data.no_collapse:
             cmd.append(ScriptOption.NoCollapse.value)
 
           # Always add the output path.
          cmd.append(ScriptOption.OutputPath.value)
-         cmd.append(self.job_data[InputParameter.OutputPath.value])
+         cmd.append(self.job_data.output_path)
 
          # Equal rates
-         if self.job_data[InputParameter.EqualRates.value]:
+         if self.job_data.equal_rates:
             cmd.append(ScriptOption.EqualRates.value)
 
          # Is time scaled (timetree)
-         if self.job_data[InputParameter.IsTimeScaled.value]:
+         if self.job_data.is_time_scaled:
             cmd.append(ScriptOption.IsTimeScaled.value)
 
          # TODO: uncomment
