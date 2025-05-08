@@ -58,7 +58,7 @@ def main(argv=None):
       os.mkdir(output_path)
 
    # Go to the output directory.
-   os.chdir(output_path)
+   #os.chdir(output_path)
 
    # Prepare the dataset
    if not runner.prepare_dataset():

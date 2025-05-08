@@ -49,13 +49,12 @@ class TreeSortRunner:
          raise ValueError("Job data in the constructor is invalid")
       
       # Set the output path's absolute path.
-      self.output_path = os.path.abspath(self.job_data[InputParameter.OutputPath.value])
+      #self.output_path = os.path.abspath(self.job_data[InputParameter.OutputPath.value])
+      self.output_path = self.job_data[InputParameter.OutputPath.value]
       
       
    @staticmethod
    def is_job_data_valid(job_data: dict) -> bool:
-
-      sys.stdout.write(str(job_data))
 
       try:
          if not job_data or not isinstance(job_data, dict) or len(job_data) == 0:
