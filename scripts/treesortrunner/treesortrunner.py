@@ -1,6 +1,6 @@
 
 from job_data import JobData
-from treesortrunner.common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, InputParameter, INVALID_FASTA_CHARS, \
+from treesortrunner.common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, INVALID_FASTA_CHARS, \
    Method, safeTrim, ScriptOption, VALID_SEGMENTS
 import re
 import os
@@ -49,7 +49,7 @@ class TreeSortRunner:
       
       self.job_data = job_data
 
-      if not TreeSortRunner.is_job_data_valid():
+      if not self.is_job_data_valid():
          raise ValueError("Job data in the constructor is invalid")
       
       # TODO: Set the output path's absolute path?
@@ -182,9 +182,14 @@ class TreeSortRunner:
          elif input_source == InputSource.FastaFileID.value:
 
             # Fetch the input file from the workspace.
+
+            # TEST
+            self.input_filename = self.default_input_filename
+            
             try:
                # TODO: Is this syntax correct?
-               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", self.input_filename]
+               fetch_fasta_cmd = ["p3-cp", f"{self.job_data.input_fasta_file_id}", self.input_filename]
+               #fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", self.input_filename]
                subprocess.check_call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:

@@ -90,7 +90,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort","-j", $job_desc,"-w", $work_dir);
+   my @cmd = ("python","-m","treesortrunner.run_treesort","-j", $job_desc,"-w", $work_dir);
 
    warn Dumper (\@cmd, $params_to_app);
 
@@ -100,8 +100,6 @@ sub process_treesort
    {
       die "Command failed: @cmd\n";
    }
-
-   = begin 
 
    # A hashmap of file suffixes.
    my %suffix_map = (tsv => 'tsv',
@@ -135,6 +133,4 @@ sub process_treesort
    {
       warn "Output directory $work_dir does not exist\n";
    }
-   
-   =cut
 }

@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 
 import argparse
-from treesortrunner.common import InputParameter, safeTrim
+from treesortrunner.common import safeTrim
 from treesortrunner.treesortrunner import TreeSortRunner
 from job_data import JobData
 import json
@@ -49,7 +50,7 @@ def main(argv=None):
 
    try:
       # Create a TreeSortRunner instance
-      runner = TreeSortRunner(job_data)
+      runner = TreeSortRunner(job_data, work_directory)
 
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
@@ -63,7 +64,7 @@ def main(argv=None):
       sys.exit(-1)
 
    # Create the output directory if it doesn't exist.
-   output_path = os.path.abspath(job_data[InputParameter.OutputPath])
+   output_path = os.path.abspath(job_data.output_path)
    if not os.path.exists(output_path):
       os.mkdir(output_path)
 
