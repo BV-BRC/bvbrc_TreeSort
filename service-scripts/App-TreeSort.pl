@@ -101,7 +101,7 @@ sub process_treesort
       die "Command failed: @cmd\n";
    }
 
-   =begin comment
+   = begin 
 
    # A hashmap of file suffixes.
    my %suffix_map = (tsv => 'tsv',
@@ -136,5 +136,5 @@ sub process_treesort
       warn "Output directory $work_dir does not exist\n";
    }
    
-   =end comment
+   =cut
 }
