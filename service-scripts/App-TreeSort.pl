@@ -90,7 +90,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort","-j", $job_desc,"-w", $work_dir);
+   my @cmd = ("run_treesort.py","-j", $job_desc,"-w", $work_dir);
 
    warn Dumper (\@cmd, $params_to_app);
 
