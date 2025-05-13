@@ -45,10 +45,14 @@ sub process_treesort
    # Declare and assign local variables for the parameters passed to the process_treesort function.
    my($app, $app_def, $raw_params, $params) = @_;
 
-   print 'Processing TreeSort ', Dumper($app_def, $raw_params, $params);
+   #warn Dumper($app_def, $raw_params, $params);
 
-   my $token = $app->token(); # DMD: Is this needed?
+   my $token = $app->token();
    my $ws = $app->workspace();
+
+   # Uncomment to print user info.
+   #my @cmd = ("p3-whoami");
+   #IPC::Run::run(\@cmd);
 
    #
    # Create an output directory under the current dir. The app service is meant to invoke
@@ -60,8 +64,6 @@ sub process_treesort
 
    # TODO: may not need a staging directory
 
-   # my $cwd = getcwd();
-
    # Create a temp directory for intermediate calculations/results.
    my $cwd = File::Temp->newdir( CLEANUP => 1 );
    my $work_dir = "$cwd/work";
@@ -69,7 +71,6 @@ sub process_treesort
 
    -d $work_dir or mkdir $work_dir or die "Cannot mkdir $work_dir: $!";
    -d $stage_dir or mkdir $stage_dir or die "Cannot mkdir $stage_dir: $!";
-
 
    # DMD: What is this for? $sstring isn't used!
    my $data_api = Bio::KBase::AppService::AppConfig->data_api_url;
@@ -90,47 +91,14 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort.py","-j", $job_desc,"-w", $work_dir);
-
-   warn Dumper (\@cmd, $params_to_app);
-
+   my @cmd = ("run_treesort.py", "-j", $job_desc, "-w", $work_dir);
    my $ok = run(\@cmd);
-
    if (!$ok)
    {
       die "Command failed: @cmd\n";
    }
 
-   # A hashmap of file suffixes.
-   my %suffix_map = (tsv => 'tsv',
-                     result => 'tsv',
-                     err => 'tsv',
-                     tre => 'nwk',
-                     html => 'html',
-                     txt => 'txt',
-                     json => 'json');
+   print `ls -l $cwd`;
 
-   # DMD: I renamed this from @suffix_map but make sure it doesn't NEED to be @suffix_map.
-   my @suffix_array = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
-
-   if (opendir(my $dh, $work_dir))
-   {
-      while (my $p = readdir($dh))
-      {
-         next if $p =~ /^\./;
-
-         my @cmd = ("p3-cp", "-r", "-f", @suffix_array, "$work_dir/$p", "ws:" . $app->result_folder);
-         print "@cmd\n";
-         my $ok = IPC::Run::run(\@cmd);
-         if (!$ok)
-         {
-            warn "Error $? copying output with @cmd\n";
-         }
-      } 
-      closedir($dh);
-   }
-   else
-   {
-      warn "Output directory $work_dir does not exist\n";
-   }
+   # TODO: copy result files to user workspace.
 }

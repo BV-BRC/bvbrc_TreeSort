@@ -39,6 +39,6 @@ fi
 
 # Start the Singularity container.
 singularity exec -B $mountPoints $container bash -c './test_050725.sh' || {
-    echo "Error: Failed to execute Singularity container."
+    echo "An error occurred in the Singularity container."
     exit 1
 }

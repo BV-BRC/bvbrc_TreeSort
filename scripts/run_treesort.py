@@ -119,6 +119,9 @@ class TreeSortRunner:
    # The JSON data for the job.
    job_data: JobData = None
    
+   # The directory where the output files will be created.
+   #staging_directory = None
+
    # The directory where the scripts will be run.
    work_directory = None
 
@@ -145,9 +148,6 @@ class TreeSortRunner:
 
       if not self.is_job_data_valid():
          raise ValueError("Job data in the constructor is invalid")
-      
-      # TODO: Set the output path's absolute path?
-      #self.job_data.output_path = os.path.abspath(self.job_data.output_path)
       
       
    # Is the JobData instance valid?
@@ -275,15 +275,12 @@ class TreeSortRunner:
             
          elif input_source == InputSource.FastaFileID.value:
 
-            # Fetch the input file from the workspace.
-
-            # TEST
+            # Use the default filename.
             self.input_filename = self.default_input_filename
-            
+
+            # Copy the input file from the workspace to the working directory.
             try:
-               # TODO: Is this syntax correct?
-               fetch_fasta_cmd = ["p3-cp", f"{self.job_data.input_fasta_file_id}", self.input_filename]
-               #fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", self.input_filename]
+               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", f"{self.work_directory}/{self.input_filename}"]
                subprocess.check_call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:
@@ -293,8 +290,8 @@ class TreeSortRunner:
             raise ValueError(f"Invalid input source: {input_source}")
 
          # Set the input filename and include its full path.
-         self.input_filename = os.path.abspath(self.input_filename)
-
+         self.input_filename = f"{self.work_directory}/{self.input_filename}"
+         
          # Validate the input FASTA file.
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
             raise IOError("Input FASTA file is invalid or empty")
@@ -435,14 +432,6 @@ def main(argv=None):
       sys.stderr.write("An error occurred in prepare_input_file\n")
       sys.exit(-1)
 
-   # Create the output directory if it doesn't exist.
-   output_path = os.path.abspath(job_data.output_path)
-   if not os.path.exists(output_path):
-      os.mkdir(output_path)
-
-   # Go to the output directory.
-   #os.chdir(output_path)
-
    # Prepare the dataset
    if not runner.prepare_dataset():
       traceback.print_exc(file=sys.stderr)
@@ -450,10 +439,10 @@ def main(argv=None):
       sys.exit(-1)
 
    # Run TreeSort
-   if not runner.tree_sort():
+   """if not runner.tree_sort():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in tree_sort\n")
-      sys.exit(-1)
+      sys.exit(-1)"""
 
 
 if __name__ == "__main__" :
