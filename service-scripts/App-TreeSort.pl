@@ -62,7 +62,7 @@ sub process_treesort
 
    # my $cwd = getcwd();
 
-   # DMD: What is the new directory named?
+   # Create a temp directory for intermediate calculations/results.
    my $cwd = File::Temp->newdir( CLEANUP => 1 );
    my $work_dir = "$cwd/work";
    my $stage_dir = "$cwd/stage";
@@ -90,7 +90,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("python","-m","treesortrunner.run_treesort","-j", $job_desc,"-w", $work_dir);
+   my @cmd = ("run_treesort","-j", $job_desc,"-w", $work_dir);
 
    warn Dumper (\@cmd, $params_to_app);
 

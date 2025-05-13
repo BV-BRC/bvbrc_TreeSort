@@ -1,16 +1,110 @@
+#!/usr/bin/env python
 
-from job_data import JobData
-from treesortrunner.common import DEFAULT_REF_SEGMENT, InferenceType, InputSource, INVALID_FASTA_CHARS, \
-   Method, safeTrim, ScriptOption, VALID_SEGMENTS
-import re
+import argparse
+from dataclasses import dataclass
+from enum import Enum
+import json
 import os
+import re
 import subprocess
 import sys
+import traceback
+from typing import Optional
 
-# TODO: use https://github.com/BV-BRC/bvbrc_subspecies_classification/blob/master/scripts/run_subspecies_classification.py as an example.
+#-----------------------------------------------------------------------------------------------------------------------------
+# Define constants
+#-----------------------------------------------------------------------------------------------------------------------------
+
+# The default reference segment.
+DEFAULT_REF_SEGMENT = "HA"
+
+# Characters to remove from FASTA headers.
+INVALID_FASTA_CHARS = "[\\['\"(),;|:\\]]"
+
+# A list of valid segments for the influenza virus.
+VALID_SEGMENTS = ["PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"]
 
 
-# A class that is responsible for 
+#-----------------------------------------------------------------------------------------------------------------------------
+# Define enums
+#-----------------------------------------------------------------------------------------------------------------------------
+
+class Filename(str, Enum):
+   Descriptor = "descriptor.csv"
+
+class InferenceType(str, Enum):
+   FastTree = "FastTree"
+   IQTree = "IQ-Tree"
+ 
+class InputSource(str, Enum):
+   FastaData = "fasta_data"
+   FastaFile = "fasta_file"
+   FastaFileID = "fasta_file_id"
+   
+class Method(str, Enum):
+   Local = "local"
+   MinCut = "mincut"
+
+# Command-line script flags / optional arguments.
+class ScriptOption(str, Enum):
+   CladesPath = "--clades"
+   DescriptorPath = "-i"
+   Deviation = "--dev"
+   EqualRates = "--equal-rates"
+   FastTree = "--fast"
+   IsTimeScaled = "--timetree"
+   MatchOnEPI = "--match-on-epi"
+   MatchOnRegex = "--match-on-regex"
+   MatchOnStrain = "--match-on-strain"
+   Method = "-m"
+   NoCollapse = "--no-collapse"
+   OutputPath = "-o"
+   PValue = "--pvalue"
+   Segments = "--segments"
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# Define utility functions
+#-----------------------------------------------------------------------------------------------------------------------------
+
+# Trim a string that's possibly null and always return a trimmed, non-null value.
+def safeTrim(text: str):
+   if not text:
+      return ""
+   else:
+      return text.strip()
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+# Define classes
+#-----------------------------------------------------------------------------------------------------------------------------
+
+# The contents of the jobdesc.json file.
+@dataclass
+class JobData:
+   clades_path: str
+   descriptor_path: str
+   deviation: float
+   equal_rates: bool
+   inference_type: InferenceType
+   input_fasta_data: str
+   input_fasta_file: str
+   input_fasta_file_id: str
+   input_source: InputSource
+   is_time_scaled: bool
+   match_on_epi: bool
+   match_on_regex: Optional[str]
+   match_on_strain: bool
+   method: Method
+   no_collapse: bool
+   output_path: str
+   p_value: float
+   ref_segment: str
+   segments: str
+
+
+# The class responsible for processing input parameters, preparing the input file, and 
+# running the TreeSort application.
 class TreeSortRunner:
 
    # The base URL
@@ -228,7 +322,7 @@ class TreeSortRunner:
       return True
 
 
-   # Run TreeSort on the command line.
+   # Run TreeSort in a sub-process.
    def tree_sort(self) -> bool:
 
       sys.stdout.write("In tree_sort\n\n")
@@ -284,3 +378,84 @@ class TreeSortRunner:
          return False
          
       return True
+
+
+
+
+def main(argv=None):
+    
+   if argv is None:
+      argv = sys.argv[1:]  # Exclude the script name
+
+   # Create an argument parser.
+   parser = argparse.ArgumentParser(description="A script to run TreeSort")
+   parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file for the job", required=True)
+   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where the scripts will be run", required=True)
+   
+   args = parser.parse_args()
+
+   # Validate the job filename parameter.
+   job_filename = safeTrim(args.job_filename)
+   if len(job_filename) == 0:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("Invalid job filename parameter\n")
+      sys.exit(-1)
+
+   # Validate the work directory parameter.
+   work_directory = safeTrim(args.work_directory)
+   if len(work_directory) == 0:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("Invalid work directory parameter\n")
+      sys.exit(-1)
+
+   # Load job data
+   job_data = None
+   try:
+      with open(job_filename, "r", encoding="utf-8") as job_file:
+         job_dict = json.load(job_file)
+         job_data = JobData(**job_dict)
+
+   except Exception as e:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write(f"Invalid job file:\n{e}\n")
+      sys.exit(-1)
+
+   try:
+      # Create a TreeSortRunner instance
+      runner = TreeSortRunner(job_data, work_directory)
+
+   except Exception as e:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write(f"Unable to create an instance of TreeSortRunner:\n{e}\n")
+      sys.exit(-1)
+   
+   # Prepare the input file
+   if not runner.prepare_input_file():
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("An error occurred in prepare_input_file\n")
+      sys.exit(-1)
+
+   # Create the output directory if it doesn't exist.
+   output_path = os.path.abspath(job_data.output_path)
+   if not os.path.exists(output_path):
+      os.mkdir(output_path)
+
+   # Go to the output directory.
+   #os.chdir(output_path)
+
+   # Prepare the dataset
+   if not runner.prepare_dataset():
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("An error occurred in prepare_dataset\n")
+      sys.exit(-1)
+
+   # Run TreeSort
+   if not runner.tree_sort():
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("An error occurred in tree_sort\n")
+      sys.exit(-1)
+
+
+if __name__ == "__main__" :
+   main()
+   
