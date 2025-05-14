@@ -120,15 +120,20 @@ class TreeSortRunner:
    job_data: JobData = None
    
    # The directory where the output files will be created.
-   #staging_directory = None
+   staging_directory = None
 
    # The directory where the scripts will be run.
    work_directory = None
 
 
    # C-tor
-   def __init__(self, job_data: JobData, work_directory: str):
+   def __init__(self, job_data: JobData, staging_directory: str, work_directory: str):
          
+      # Set and validate the staging directory.
+      self.staging_directory = staging_directory
+      if not self.staging_directory or len(self.staging_directory) < 1:
+         raise ValueError("The staging directory parameter is invalid")
+      
       # Set and validate the work directory.
       self.work_directory = work_directory
       if not self.work_directory or len(self.work_directory) < 1:
@@ -146,6 +151,7 @@ class TreeSortRunner:
       
       self.job_data = job_data
 
+      # Validate the job data.
       if not self.is_job_data_valid():
          raise ValueError("Job data in the constructor is invalid")
       
@@ -172,9 +178,11 @@ class TreeSortRunner:
             raise ValueError("The input FASTA file is invalid")
          
          # If input_source is fasta_file_id, make sure an input_fasta_file_id value was provided.
-         if self.job_data.input_source == InputSource.FastaFileID.value and \
-         not self.job_data.input_fasta_file_id:
-            raise ValueError("The input FASTA file ID is invalid")
+         if self.job_data.input_source == InputSource.FastaFileID.value:
+            if not self.job_data.input_fasta_file_id:
+               raise ValueError("The input FASTA file ID is invalid")
+            elif self.job_data.input_fasta_file_id.startswith("ws:"):
+               self.job_data.input_fasta_file_id = self.job_data.input_fasta_file_id[3:]
 
          # Validate the method
          if self.job_data.method not in [m.value for m in Method]:
@@ -232,7 +240,7 @@ class TreeSortRunner:
             cmd.append(refSegment)
 
          # The output path
-         cmd.append(self.job_data.output_path)
+         cmd.append(self.staging_directory)
 
          # TEST
          print(f"{' '.join(cmd)}\n\n")
@@ -386,7 +394,8 @@ def main(argv=None):
 
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
-   parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file for the job", required=True)
+   parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file with the job description", required=True)
+   parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be created", required=True)
    parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where the scripts will be run", required=True)
    
    args = parser.parse_args()
@@ -396,6 +405,13 @@ def main(argv=None):
    if len(job_filename) == 0:
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("Invalid job filename parameter\n")
+      sys.exit(-1)
+
+   # Validate the staging directory parameter.
+   staging_directory = safeTrim(args.staging_directory)
+   if len(staging_directory) == 0:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("Invalid staging directory parameter\n")
       sys.exit(-1)
 
    # Validate the work directory parameter.
@@ -419,7 +435,7 @@ def main(argv=None):
 
    try:
       # Create a TreeSortRunner instance
-      runner = TreeSortRunner(job_data, work_directory)
+      runner = TreeSortRunner(job_data, staging_directory, work_directory)
 
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
