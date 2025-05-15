@@ -1,6 +1,5 @@
 {
    "clades_path": "",
-   "descriptor_path": "test",
    "deviation": 2.0,
    "equal_rates": true,
    "inference_type": "FastTree",

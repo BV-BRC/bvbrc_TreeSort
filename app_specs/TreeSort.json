@@ -13,15 +13,6 @@
          "label": "Clades path",
          "desc": "Path to an output file, where clades with evidence of reassortment will be saved",
          "type": "string"
-      },  
-      {
-         "id": "descriptor_path",
-         "allow_multiple": false,
-         "required": 0,
-         "default": null,
-         "label": "Path to the descriptor file",
-         "desc": "The descriptor file provides paths to the alignments and phylogenetic trees for different virus segments",
-         "type": "string"
       },
       {
          "id": "deviation",

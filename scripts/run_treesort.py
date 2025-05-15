@@ -19,7 +19,7 @@ from typing import Optional
 DEFAULT_REF_SEGMENT = "HA"
 
 # Characters to remove from FASTA headers.
-INVALID_FASTA_CHARS = "[\\['\"(),;|:\\]]"
+INVALID_FASTA_CHARS = "[\\['\"(),;:\\]]"
 
 # A list of valid segments for the influenza virus.
 VALID_SEGMENTS = ["PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"]
@@ -108,22 +108,22 @@ class JobData:
 class TreeSortRunner:
 
    # The base URL
-   base_url: str = None
+   base_url: str
 
    # The default name of the input FASTA file.
    default_input_filename: str = "input.fasta"
 
    # The name of the FASTA file to use as input. This is specified in job_data.
-   input_filename: str = None
+   input_filename: str
 
    # The JSON data for the job.
-   job_data: JobData = None
+   job_data: JobData
    
    # The directory where the output files will be created.
-   staging_directory = None
+   staging_directory: str
 
    # The directory where the scripts will be run.
-   work_directory = None
+   work_directory: str
 
 
    # C-tor
@@ -218,8 +218,11 @@ class TreeSortRunner:
 
       sys.stdout.write("In prepare_dataset\n\n")
       
+      # The result status is false by default.
+      result_status = False
+
       try:
-         # Example usage: ./prepare_dataset.sh --segments "HA,NA" segments.fasta HA myoutdir
+         # Example usage: ./prepare_dataset.sh segments.fasta HA myoutdir
          cmd = ["prepare_dataset.sh"]
 
          # Should --fast be added?
@@ -240,19 +243,20 @@ class TreeSortRunner:
             cmd.append(refSegment)
 
          # The output path
-         cmd.append(self.staging_directory)
+         cmd.append(self.work_directory)
 
          # TEST
          print(f"{' '.join(cmd)}\n\n")
 
-         result = subprocess.check_call(cmd, shell=False)
-         print(f"Result = {str(result)}\n\n")
+         result = subprocess.call(cmd, shell=False)
+         if result == 0:
+            result_status = True
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
          return False
          
-      return True
+      return result_status
      
 
    # Determine the source of the FASTA input file and prepare it for use.
@@ -289,7 +293,7 @@ class TreeSortRunner:
             # Copy the input file from the workspace to the working directory.
             try:
                fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", f"{self.work_directory}/{self.input_filename}"]
-               subprocess.check_call(fetch_fasta_cmd, shell=False)
+               subprocess.call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:
                raise IOError("Error copying FASTA file from workspace:\n %s" % str(e))
@@ -332,6 +336,9 @@ class TreeSortRunner:
 
       sys.stdout.write("In tree_sort\n\n")
       
+      # The result status is false by default.
+      result_status = False
+
       try:
          cmd = ["treesort"]
 
@@ -341,11 +348,9 @@ class TreeSortRunner:
             cmd.append(ScriptOption.CladesPath.value)
             cmd.append(clades_path)
 
-         # The descriptor path.
-         descriptor_path = safeTrim(self.job_data.descriptor_path)
-         if len(descriptor_path) > 0:
-            cmd.append(ScriptOption.DescriptorPath.value)
-            cmd.append(descriptor_path)
+         # The descriptor file is in the working directory.
+         cmd.append(ScriptOption.DescriptorPath.value)
+         cmd.append(self.work_directory)
 
          # The "match on" options are mutually exclusive.
          if self.job_data.match_on_strain:
@@ -362,10 +367,10 @@ class TreeSortRunner:
          if self.job_data.no_collapse:
             cmd.append(ScriptOption.NoCollapse.value)
 
-          # Always add the output path.
+          # Always add the output path (staging directory)
          cmd.append(ScriptOption.OutputPath.value)
-         cmd.append(self.job_data.output_path)
-
+         cmd.append(self.staging_directory)
+         
          # Equal rates
          if self.job_data.equal_rates:
             cmd.append(ScriptOption.EqualRates.value)
@@ -374,15 +379,19 @@ class TreeSortRunner:
          if self.job_data.is_time_scaled:
             cmd.append(ScriptOption.IsTimeScaled.value)
 
-         # TODO: uncomment
-         # result = subprocess.check_call(cmd, shell=False)
+         # TEST
          print(f"{' '.join(cmd)}\n\n")
+
+         # Run the command
+         result = subprocess.call(cmd, shell=False)
+         if result == 0:
+            result_status = True
 
       except ValueError as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
          return False
          
-      return True
+      return result_status
 
 
 
@@ -455,10 +464,10 @@ def main(argv=None):
       sys.exit(-1)
 
    # Run TreeSort
-   """if not runner.tree_sort():
+   if not runner.tree_sort():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in tree_sort\n")
-      sys.exit(-1)"""
+      sys.exit(-1)
 
 
 if __name__ == "__main__" :

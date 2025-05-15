@@ -13,7 +13,6 @@ It takes the following parameters:
 | id | label | type | required | default value |
 | -- | ----- | ---- | :------: | ------------  |
 | clades_path | Clades path | string | ??? | |
-| descriptor_path | Path to the descriptor file | string | ??? | |
 | deviation | Deviation | float? | | 2 |
 | equal_rates | Equal rates | boolean | | |
 | inference_type | Inference type | FastTree, IQ-Tree | | IQ-Tree |
