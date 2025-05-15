@@ -3,7 +3,7 @@
 # This will be called by the singularity container.
 
 # Update the path
-export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.ddempsey/miniconda3/bin/
+export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.ddempsey/miniconda3/envs/treesort-env/bin
 
 # TEST
 cd /project/external/TreeSort
@@ -13,3 +13,6 @@ perl /project/service-scripts/App-TreeSort.pl https://p3.theseed.org/services/ap
 
 # Run the Python module that runs TreeSort.
 #run_treesort -j ./tests/swine_H1_test/jobdesc.json -w ./tests/swine_H1_test
+
+# Run TreeSort directly.
+#./prepare_dataset.sh ../../tests/swine_H1/swine_H1_HANA.fasta HA ../../tests/swine_H1/test_output

@@ -100,5 +100,31 @@ sub process_treesort
 
    print `ls -l $stage_dir`;
 
-   # TODO: copy result files to user workspace.
+   my %suffix_map = (aln => 'aligned_dna_fasta',
+                     csv => 'csv',
+                     pdf => 'pdf',
+                     tsv => 'tsv');
+
+   my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
+
+   if (opendir(my $dh, $stage_dir))
+   {
+      while (my $p = readdir($dh))
+      {
+         next if $p =~ /^\./;
+
+         my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/$p", "ws:" . $app->result_folder);
+         print "@cmd\n";
+         my $ok = IPC::Run::run(\@cmd);
+         if (!$ok)
+         {
+               warn "Error $? copying output with @cmd\n";
+         }
+      } 
+      closedir($dh);
+   }
+   else
+   {
+      warn "Output directory $stage_dir does not exist\n";
+   }
 }
