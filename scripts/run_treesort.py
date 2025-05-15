@@ -83,7 +83,6 @@ def safeTrim(text: str):
 @dataclass
 class JobData:
    clades_path: str
-   descriptor_path: str
    deviation: float
    equal_rates: bool
    inference_type: InferenceType
