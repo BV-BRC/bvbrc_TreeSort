@@ -18,6 +18,9 @@ from typing import Optional
 # The default reference segment.
 DEFAULT_REF_SEGMENT = "HA"
 
+# The name of the descriptor file.
+DESCRIPTOR_FILE_NAME = "descriptor.csv"
+
 # Characters to remove from FASTA headers.
 INVALID_FASTA_CHARS = "[\\['\"(),;:\\]]"
 
@@ -28,9 +31,6 @@ VALID_SEGMENTS = ["PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"]
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define enums
 #-----------------------------------------------------------------------------------------------------------------------------
-
-class Filename(str, Enum):
-   Descriptor = "descriptor.csv"
 
 class InferenceType(str, Enum):
    FastTree = "FastTree"
@@ -241,8 +241,9 @@ class TreeSortRunner:
          if refSegment:
             cmd.append(refSegment)
 
+         # DMD TESTING
          # The output path
-         cmd.append(self.work_directory)
+         cmd.append(f"{self.work_directory}/output")
 
          # TEST
          print(f"{' '.join(cmd)}\n\n")
@@ -349,7 +350,7 @@ class TreeSortRunner:
 
          # The descriptor file is in the working directory.
          cmd.append(ScriptOption.DescriptorPath.value)
-         cmd.append(self.work_directory)
+         cmd.append(f"{self.work_directory}/output/{DESCRIPTOR_FILE_NAME}")
 
          # The "match on" options are mutually exclusive.
          if self.job_data.match_on_strain:
@@ -455,6 +456,9 @@ def main(argv=None):
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in prepare_input_file\n")
       sys.exit(-1)
+
+   # TESTING
+   subprocess.call(["ls", "-l", work_directory], shell=False)
 
    # Prepare the dataset
    if not runner.prepare_dataset():
