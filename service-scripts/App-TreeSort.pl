@@ -92,7 +92,7 @@ sub process_treesort
    print `ls -l $stage_dir`."\n";
 
    # A modifiable version of the workspace's result folder name.
-   my $result_folder = $app->result_folder
+   my $result_folder = $app->result_folder;
 
    # Make sure the result folder name doesn't end with a period.
    if (substr $result_folder, -1 eq ".")
