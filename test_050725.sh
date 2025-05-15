@@ -5,8 +5,8 @@
 # Update the path
 export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.ddempsey/miniconda3/bin/
 
-# Go to the scripts directory.
-#cd /project/scripts
+# TEST
+cd /project/external/TreeSort
 
 # Run the Perl script that runs the Python module that runs TreeSort.
 perl /project/service-scripts/App-TreeSort.pl https://p3.theseed.org/services/app_service /project/app_specs/TreeSort.json /project/tests/swine_H1/jobdesc.json

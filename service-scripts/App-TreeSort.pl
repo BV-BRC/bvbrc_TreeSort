@@ -98,7 +98,7 @@ sub process_treesort
       die "Command failed: @cmd\n";
    }
 
-   print `ls -l $cwd`;
+   print `ls -l $stage_dir`;
 
    # TODO: copy result files to user workspace.
 }
