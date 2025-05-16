@@ -21,6 +21,9 @@ DEFAULT_REF_SEGMENT = "HA"
 # The name of the descriptor file.
 DESCRIPTOR_FILE_NAME = "descriptor.csv"
 
+# The default name of the input FASTA file.
+INPUT_FASTA_FILE_NAME = "input.fasta"
+
 # Characters to remove from FASTA headers.
 INVALID_FASTA_CHARS = "[\\['\"(),;:\\]]"
 
@@ -109,8 +112,8 @@ class TreeSortRunner:
    # The base URL
    base_url: str
 
-   # The default name of the input FASTA file.
-   default_input_filename: str = "input.fasta"
+   # the name of the directory containing the input FASTA file.
+   input_directory: str
 
    # The name of the FASTA file to use as input. This is specified in job_data.
    input_filename: str
@@ -126,8 +129,13 @@ class TreeSortRunner:
 
 
    # C-tor
-   def __init__(self, job_data: JobData, staging_directory: str, work_directory: str):
+   def __init__(self, input_directory: str, job_data: JobData, staging_directory: str, work_directory: str):
          
+      # Set and validate the input directory.
+      self.input_directory = input_directory
+      if not self.input_directory or len(self.input_directory) < 1:
+         raise ValueError("The input directory parameter is invalid")
+      
       # Set and validate the staging directory.
       self.staging_directory = staging_directory
       if not self.staging_directory or len(self.staging_directory) < 1:
@@ -217,7 +225,7 @@ class TreeSortRunner:
 
       sys.stdout.write("In prepare_dataset\n\n")
       
-      # The result status is false by default.
+      # The result status defaults to false.
       result_status = False
 
       try:
@@ -233,7 +241,7 @@ class TreeSortRunner:
             cmd.append(ScriptOption.Segments.value)
             cmd.append(self.job_data.segments)
 
-         # The input FASTA file.
+         # The input FASTA file
          cmd.append(self.input_filename)
 
          # The reference segment
@@ -241,9 +249,8 @@ class TreeSortRunner:
          if refSegment:
             cmd.append(refSegment)
 
-         # DMD TESTING
-         # The output path
-         cmd.append(f"{self.work_directory}/output")
+         # The output directory
+         cmd.append(self.work_directory)
 
          # TEST
          print(f"{' '.join(cmd)}\n\n")
@@ -269,10 +276,13 @@ class TreeSortRunner:
          input_source = safeTrim(self.job_data.input_source)
 
          if input_source == InputSource.FastaData.value:
-         
-            # Copy user data to the input file.
+      
+            # Create the input filename, including its full path.
+            self.input_filename = f"{self.input_directory}/{INPUT_FASTA_FILE_NAME}"
+
             try:
-               with open(self.default_input_filename, "w+") as input_file:
+               # Create a file that contains the input FASTA data.
+               with open(self.input_filename, "w+") as input_file:
                   input_file.write(self.job_data.input_fasta_data)
 
             except Exception as e:
@@ -287,12 +297,12 @@ class TreeSortRunner:
             
          elif input_source == InputSource.FastaFileID.value:
 
-            # Use the default filename.
-            self.input_filename = self.default_input_filename
+            # Create the input filename, including its full path.
+            self.input_filename = f"{self.input_directory}/{INPUT_FASTA_FILE_NAME}"
 
-            # Copy the input file from the workspace to the working directory.
             try:
-               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", f"{self.work_directory}/{self.input_filename}"]
+               # Copy the input file from the workspace to the working directory.
+               fetch_fasta_cmd = ["p3-cp", f"ws:{self.job_data.input_fasta_file_id}", self.input_filename]
                subprocess.call(fetch_fasta_cmd, shell=False)
 
             except Exception as e:
@@ -301,8 +311,9 @@ class TreeSortRunner:
          else:
             raise ValueError(f"Invalid input source: {input_source}")
 
-         # Set the input filename and include its full path.
-         self.input_filename = f"{self.work_directory}/{self.input_filename}"
+         # Validate the input filename.
+         if not self.input_filename:
+            raise ValueError("Invalid input filename (empty)")
          
          # Validate the input FASTA file.
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
@@ -336,7 +347,7 @@ class TreeSortRunner:
 
       sys.stdout.write("In tree_sort\n\n")
       
-      # The result status is false by default.
+      # The result status defaults to false.
       result_status = False
 
       try:
@@ -350,7 +361,7 @@ class TreeSortRunner:
 
          # The descriptor file is in the working directory.
          cmd.append(ScriptOption.DescriptorPath.value)
-         cmd.append(f"{self.work_directory}/output/{DESCRIPTOR_FILE_NAME}")
+         cmd.append(f"{self.work_directory}/{DESCRIPTOR_FILE_NAME}")
 
          # The "match on" options are mutually exclusive.
          if self.job_data.match_on_strain:
@@ -395,7 +406,6 @@ class TreeSortRunner:
 
 
 
-
 def main(argv=None):
     
    if argv is None:
@@ -403,11 +413,19 @@ def main(argv=None):
 
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
+   parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory that will contain the FASTA input file(s)", required=True)
    parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file with the job description", required=True)
    parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be created", required=True)
-   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where the scripts will be run", required=True)
+   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory that will contain generated intermediate files", required=True)
    
    args = parser.parse_args()
+
+   # Validate the input directory parameter.
+   input_directory = safeTrim(args.input_directory)
+   if len(input_directory) == 0:
+      traceback.print_exc(file=sys.stderr)
+      sys.stderr.write("Invalid input directory parameter\n")
+      sys.exit(-1)
 
    # Validate the job filename parameter.
    job_filename = safeTrim(args.job_filename)
@@ -444,7 +462,7 @@ def main(argv=None):
 
    try:
       # Create a TreeSortRunner instance
-      runner = TreeSortRunner(job_data, staging_directory, work_directory)
+      runner = TreeSortRunner(input_directory, job_data, staging_directory, work_directory)
 
    except Exception as e:
       traceback.print_exc(file=sys.stderr)

@@ -55,15 +55,18 @@ sub process_treesort
    # Create a temp directory for intermediate calculations/results.
    my $cwd = File::Temp->newdir( CLEANUP => 1 );
 
-   # Create a "working" subdirectory for the input and intermediate file(s).
-   my $work_dir = "$cwd/work";
-   
+   # Create an "input" subdirectory for the input FASTA file, etc.
+   my $input_dir = "$cwd/input";
+   -d $input_dir or mkdir $input_dir or die "Cannot mkdir $input_dir: $!";
+
    # Create a "staging" subdirectory for output files that will be copied to the workspace.
    my $stage_dir = "$cwd/stage";
-
-   -d $work_dir or mkdir $work_dir or die "Cannot mkdir $work_dir: $!";
    -d $stage_dir or mkdir $stage_dir or die "Cannot mkdir $stage_dir: $!";
 
+   # Create a "working" subdirectory for the input and intermediate file(s).
+   my $work_dir = "$cwd/work";
+   -d $work_dir or mkdir $work_dir or die "Cannot mkdir $work_dir: $!";
+   
    # TODO: Are these needed?
    my $data_api = Bio::KBase::AppService::AppConfig->data_api_url;
    my $dat = { data_api => $data_api };
@@ -81,7 +84,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort.py", "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
+   my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
    my $ok = run(\@cmd);
    if (!$ok)
    {
@@ -95,6 +98,7 @@ sub process_treesort
    my $result_folder = $app->result_folder;
 
    # Make sure the result folder name doesn't end with a period.
+   # TODO: Why does it end with a period?
    if (substr $result_folder, -1 eq ".")
    {
       $result_folder = substr $result_folder, 0, -1;
