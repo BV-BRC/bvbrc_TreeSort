@@ -43,7 +43,8 @@ sub process_treesort
    # Declare and assign local variables for the parameters passed to the process_treesort function.
    my($app, $app_def, $raw_params, $params) = @_;
 
-   warn Dumper($app_def, $raw_params, $params);
+   # Uncomment to troubleshoot the parameters.
+   # warn Dumper($app_def, $raw_params, $params);
 
    my $token = $app->token();
    my $ws = $app->workspace();
@@ -53,7 +54,8 @@ sub process_treesort
    IPC::Run::run(\@cmd);
 
    # Create a temp directory for intermediate calculations/results.
-   my $cwd = File::Temp->newdir( CLEANUP => 1 );
+   # DMD TEST: Commented out the cleanup so the directory won't be deleted.
+   my $cwd = File::Temp->newdir(); # CLEANUP => 1 );
 
    # Create an "input" subdirectory for the input FASTA file, etc.
    my $input_dir = "$cwd/input";
@@ -113,6 +115,7 @@ sub process_treesort
 
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
+   # Copy the files from the staging directory to the workspace.
    if (opendir(my $dh, $stage_dir))
    {
       # Iterate over the files in the staging directory.

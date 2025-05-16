@@ -230,7 +230,8 @@ class TreeSortRunner:
 
       try:
          # Example usage: ./prepare_dataset.sh segments.fasta HA myoutdir
-         cmd = ["prepare_dataset.sh"]
+         # TODO: Replace this with the actual script name!
+         cmd = ["prepare_dataset_051625.sh"]
 
          # Should --fast be added?
          if (self.job_data.inference_type and self.job_data.inference_type == InferenceType.FastTree.value):
@@ -475,9 +476,6 @@ def main(argv=None):
       sys.stderr.write("An error occurred in prepare_input_file\n")
       sys.exit(-1)
 
-   # TESTING
-   subprocess.call(["ls", "-l", work_directory], shell=False)
-
    # Prepare the dataset
    if not runner.prepare_dataset():
       traceback.print_exc(file=sys.stderr)
@@ -485,10 +483,10 @@ def main(argv=None):
       sys.exit(-1)
 
    # Run TreeSort
-   if not runner.tree_sort():
+   """if not runner.tree_sort():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in tree_sort\n")
-      sys.exit(-1)
+      sys.exit(-1)"""
 
 
 if __name__ == "__main__" :
