@@ -441,13 +441,9 @@ class TreeSortRunner:
          
          current_segment = None
 
-         line_count = 0
 
          # Iterate over every line in the file.
          for line in f:
-
-            if line_count % 20 == 0:
-               print(f"line number {line_count}")
 
             if line.startswith(">"):
                header = line.strip()
@@ -472,21 +468,21 @@ class TreeSortRunner:
             else:
                fasta_by_segment[current_segment] = line
 
-            line_count += 1
 
          # Write the contents of fasta_by_segment to new FASTA files.
          for segment in fasta_by_segment.keys():
 
-            print(f"segment key = {segment}")
+            print(f"segment key = {segment}\n")
 
-            fasta = fasta_by_segment[segment]
+            fasta = fasta_by_segment.get(segment)
             if not fasta or len(fasta) < 1:
                print("no fasta for this key")
                continue
 
-            with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
-               fasta_file.write(fasta)
-               fasta_file.close()
+            print(f"fasta = {fasta}\n")
+            #with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
+             #  fasta_file.write(fasta)
+             #  fasta_file.close()
          
       return True
 
