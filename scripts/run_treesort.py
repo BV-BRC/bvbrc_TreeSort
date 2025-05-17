@@ -297,6 +297,8 @@ class TreeSortRunner:
 
          # Create the descriptor file.
 
+         result_status = True
+
       except Exception as e:
          sys.stderr.write(f"Error preparing dataset:\n {e}\n")
          return False
@@ -441,7 +443,6 @@ class TreeSortRunner:
          
          current_segment = None
 
-
          # Iterate over every line in the file.
          for line in f:
 
@@ -479,10 +480,14 @@ class TreeSortRunner:
                print("no fasta for this key")
                continue
 
-            print(f"fasta = {fasta}\n")
-            #with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
-             #  fasta_file.write(fasta)
-             #  fasta_file.close()
+            try:
+               print(f"fasta = {fasta}\n")
+               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "r+") as fasta_file:
+                  fasta_file.write(fasta)
+
+            except Exception as e:
+               sys.stderr.write(f"Error creating FASTA file for {segment}:\n {e}\n")
+               return False
          
       return True
 
