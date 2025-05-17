@@ -2,9 +2,8 @@
    "clades_path": "",
    "deviation": 2.0,
    "equal_rates": true,
-   "inference_type": "FastTree",
+   "input_existing_directory": null,
    "input_fasta_data": null,
-   "input_fasta_file": null,
    "input_fasta_file_id": "/ddempsey@bvbrc/home/TreeSort/swine_H1/swine_H1_HANA.fasta",
    "input_source": "fasta_file_id",
    "is_time_scaled": false,
@@ -14,7 +13,9 @@
    "method": "local",
    "no_collapse": true,
    "output_path": "/ddempsey@bvbrc/home/TreeSort/swine_H1/output",
+   "prepare_dataset": true,
    "p_value": 0.001,
    "ref_segment": "HA",
+   "ref_tree_inference": "FastTree",
    "segments": null
 }
