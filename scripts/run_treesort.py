@@ -153,6 +153,9 @@ class TreeSortRunner:
       if not self.work_directory or len(self.work_directory) < 1:
          raise ValueError("The work directory parameter is invalid")
       
+      # Initialize member variables.
+      self.fasta_segments = []
+
       # Determine the base URL.
       if "P3_BASE_URL" in os.environ:
          self.base_url = os.environ["P3_BASE_URL"]
@@ -274,25 +277,29 @@ class TreeSortRunner:
       # at this point, but we don't need to do that here as the working directory
       # was just created and is empty.
       
-      # Split the input FASTA file into multiple files by segment.
-      self.split_fasta_by_segment()
+      try:
 
-      # Run mafft to align the segments.
+         # Split the input FASTA file into multiple files by segment.
+         self.split_fasta_by_segment()
 
-
-      # Remove the segment-specific FASTA files.
-
-
-      # Iterate over all valid segments and:
-      # 1. Build reference trees for each segment. Note that the reference segment
-      #    might be handled differently.
-      #
-      # 2. Root trees with treetime
+         # Run mafft to align the segments.
 
 
-      # Create the descriptor file.
+         # Remove the segment-specific FASTA files.
 
 
+         # Iterate over all valid segments and:
+         # 1. Build reference trees for each segment. Note that the reference segment
+         #    might be handled differently.
+         #
+         # 2. Root trees with treetime
+
+
+         # Create the descriptor file.
+
+      except Exception as e:
+         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
+         return False
 
       return result_status
 
