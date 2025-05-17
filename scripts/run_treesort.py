@@ -482,7 +482,7 @@ class TreeSortRunner:
 
             try:
                print(f"fasta = {fasta}\n")
-               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "r+") as fasta_file:
+               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
                   fasta_file.write(fasta)
 
             except Exception as e:
