@@ -609,7 +609,7 @@ def main(argv=None):
          sys.exit(-1)
 
       # Prepare the dataset
-      if not runner.run_prepare_dataset():
+      if not runner.prepare_dataset():
          traceback.print_exc(file=sys.stderr)
          sys.stderr.write("An error occurred in prepare_dataset\n")
          sys.exit(-1)
