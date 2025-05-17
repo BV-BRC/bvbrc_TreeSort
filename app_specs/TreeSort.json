@@ -33,14 +33,12 @@
          "type": "boolean"
       },
       {
-         "id": "inference_type",
-         "allow_multiple": false,
+         "id": "input_existing_directory",
+         "label": "Existing directory",
          "required": 0,
-         "default": "IQ-Tree",
-         "label": "Inference type",
-         "desc": "Should the reference phylogeny be built using FastTree (fast, low quality) or IQ-Tree (slower, high quality)?",
-         "type": "enum",
-         "enum": ["FastTree", "IQ-Tree"]
+         "default": null,
+         "desc": "A directory with previously generated files",
+         "type": "string"
       },
       {
          "id": "input_fasta_data",
@@ -48,14 +46,6 @@
          "required": 0,
          "default": null,
          "desc": "The input FASTA sequence",
-         "type": "string"
-      },
-      {
-         "id": "input_fasta_file",
-         "label": "Input FASTA filename",
-         "required": 0,
-         "default": null,
-         "desc": "A FASTA input file",
          "type": "string"
       },
       {
@@ -72,8 +62,8 @@
          "required": 1,
          "default": "fasta_file_id",
          "label": "Input source",
-         "desc": "Is the input a FASTA sequence or the ID of a FASTA file in the workspace?",
-         "enum": ["fasta_data", "fasta_file", "fasta_file_id"],
+         "desc": "Is the input a FASTA sequence, the ID of a FASTA file in the workspace, or a directory with previously prepared files?",
+         "enum": ["fasta_data", "fasta_file_id", "prepared_files"],
          "type": "enum"
       },
       {
@@ -117,7 +107,7 @@
          "allow_multiple": false,
          "required": 0,
          "default": "local",
-         "label": "Method",
+         "label": "Reassortment inference method",
          "desc": "Methods are \"local\" (default) or \"mincut\". The \"mincut\" method always determines the most parsimonious reassortment placement even in ambiguous circumstances",
          "enum": ["local", "mincut"],
          "type": "enum"
@@ -141,6 +131,15 @@
          "type": "string"
       }, 
       {
+         "id": "prepare_dataset",
+         "allow_multiple": false,
+         "required": 1,
+         "default": 1,
+         "label": "Prepare dataset?",
+         "desc": "Should a FASTA file be prepared for reassortment analysis, or has the analysis already been done?",
+         "type": "boolean"
+      }, 
+      {
          "id": "p_value",
          "allow_multiple": false,
          "required": 0,
@@ -157,6 +156,16 @@
          "label": "Reference Segment",
          "desc": "The reference segment",
          "type": "string"
+      },
+      {
+         "id": "ref_tree_inference",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "IQTree",
+         "label": "Reference tree inference method",
+         "desc": "Should the reference phylogeny be built using FastTree (fast, low quality) or IQ-Tree (slower, high quality)?",
+         "type": "enum",
+         "enum": ["FastTree", "IQTree"]
       },
       {
          "id": "segments",

@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import traceback
 from typing import Optional
 
@@ -35,14 +36,10 @@ VALID_SEGMENTS = ["PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"]
 # Define enums
 #-----------------------------------------------------------------------------------------------------------------------------
 
-class InferenceType(str, Enum):
-   FastTree = "FastTree"
-   IQTree = "IQ-Tree"
- 
 class InputSource(str, Enum):
    FastaData = "fasta_data"
-   FastaFile = "fasta_file"
    FastaFileID = "fasta_file_id"
+   PreparedFiles = "prepared_files"
    
 class Method(str, Enum):
    Local = "local"
@@ -65,13 +62,17 @@ class ScriptOption(str, Enum):
    PValue = "--pvalue"
    Segments = "--segments"
 
-
+class TreeInference(str, Enum):
+   FastTree = "FastTree"
+   IQTree = "IQ-Tree"
+   # RAxML = "RAxML" # Not implemented yet
+ 
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define utility functions
 #-----------------------------------------------------------------------------------------------------------------------------
 
 # Trim a string that's possibly null and always return a trimmed, non-null value.
-def safeTrim(text: str):
+def safeTrim(text: str|None):
    if not text:
       return ""
    else:
@@ -88,10 +89,9 @@ class JobData:
    clades_path: str
    deviation: float
    equal_rates: bool
-   inference_type: InferenceType
-   input_fasta_data: str
-   input_fasta_file: str
-   input_fasta_file_id: str
+   input_existing_directory: Optional[str]
+   input_fasta_data: Optional[str]
+   input_fasta_file_id: Optional[str]
    input_source: InputSource
    is_time_scaled: bool
    match_on_epi: bool
@@ -100,10 +100,13 @@ class JobData:
    method: Method
    no_collapse: bool
    output_path: str
+   prepare_dataset: bool
    p_value: float
    ref_segment: str
-   segments: str
-
+   ref_tree_inference: TreeInference
+   segments: Optional[str]
+   
+   
 
 # The class responsible for processing input parameters, preparing the input file, and 
 # running the TreeSort application.
@@ -179,19 +182,41 @@ class TreeSortRunner:
          not self.job_data.input_fasta_data:
             raise ValueError("The input FASTA data is invalid")
          
-         # If input_source is fasta_file, make sure an input_fasta_file value was provided.
-         if self.job_data.input_source == InputSource.FastaFile.value and \
-         not self.job_data.input_fasta_file:
-            raise ValueError("The input FASTA file is invalid")
-         
-         # If input_source is fasta_file_id, make sure an input_fasta_file_id value was provided.
-         if self.job_data.input_source == InputSource.FastaFileID.value:
-            if not self.job_data.input_fasta_file_id:
-               raise ValueError("The input FASTA file ID is invalid")
-            elif self.job_data.input_fasta_file_id.startswith("ws:"):
-               self.job_data.input_fasta_file_id = self.job_data.input_fasta_file_id[3:]
+         if self.job_data.prepare_dataset:
 
-         # Validate the method
+            # The dataset will be prepared before running TreeSort.
+
+            if self.job_data.input_source == InputSource.FastaData.value:
+
+               # Make sure an input_fasta_data value was provided.
+               if not self.job_data.input_fasta_data:
+                  raise ValueError("The input FASTA data is invalid")
+
+            elif self.job_data.input_source == InputSource.FastaFileID.value:
+
+               # Make sure an input_fasta_file_id value was provided.
+               if not self.job_data.input_fasta_file_id:
+                  raise ValueError("The input FASTA file ID is invalid")
+               
+               elif self.job_data.input_fasta_file_id.startswith("ws:"):
+
+                  # Remove the "ws:" prefix from the directory name.
+                  self.job_data.input_fasta_file_id = self.job_data.input_fasta_file_id[3:]
+         else:
+
+            # If input_source is prepared_files, make sure an input_existing_directory value was provided.
+            if self.job_data.input_source != InputSource.PreparedFiles.value:
+               raise ValueError(f"The input source {self.job_data.input_source} is invalid")
+            
+            if not self.job_data.input_existing_directory:
+               raise ValueError("An existing directory of prepared files is required")
+            
+            if self.job_data.input_existing_directory.startswith("ws:"):
+
+               # Remove the "ws:" prefix from the directory name.
+               self.job_data.input_existing_directory = self.job_data.input_existing_directory[3:]
+
+         # Validate the inference method
          if self.job_data.method not in [m.value for m in Method]:
             raise ValueError("job_data.method is not a valid method") 
 
@@ -203,6 +228,7 @@ class TreeSortRunner:
          refSegment = safeTrim(self.job_data.ref_segment)
          if not refSegment:
             refSegment = DEFAULT_REF_SEGMENT
+
          elif not refSegment in VALID_SEGMENTS:
             raise ValueError(f"Invalid reference segment: {refSegment}")
 
@@ -234,7 +260,8 @@ class TreeSortRunner:
          cmd = ["prepare_dataset_051625.sh"]
 
          # Should --fast be added?
-         if (self.job_data.inference_type and self.job_data.inference_type == InferenceType.FastTree.value):
+         # TODO: Support FastTree, IQ-Tree, and RAxML
+         if (self.job_data.ref_tree_inference and self.job_data.ref_tree_inference == TreeInference.FastTree.value):
             cmd.append(ScriptOption.FastTree.value)
 
          # The segments (optional)
@@ -276,29 +303,9 @@ class TreeSortRunner:
          # The input source determines how the input file is provided.
          input_source = safeTrim(self.job_data.input_source)
 
-         if input_source == InputSource.FastaData.value:
-      
-            # Create the input filename, including its full path.
-            self.input_filename = f"{self.input_directory}/{INPUT_FASTA_FILE_NAME}"
+         if input_source == InputSource.FastaFileID.value:
 
-            try:
-               # Create a file that contains the input FASTA data.
-               with open(self.input_filename, "w+") as input_file:
-                  input_file.write(self.job_data.input_fasta_data)
-
-            except Exception as e:
-               raise IOError(f"Error copying FASTA data to input file:\n {e}\n")
-
-         elif input_source == InputSource.FastaFile.value:
-
-            # The input file will be in the local filesystem.
-            self.input_filename = safeTrim(self.job_data.input_fasta_file)
-            if len(self.input_filename) == 0:
-               raise ValueError("Invalid input filename")
-            
-         elif input_source == InputSource.FastaFileID.value:
-
-            # Create the input filename, including its full path.
+            # Populate the input filename, including its full path.
             self.input_filename = f"{self.input_directory}/{INPUT_FASTA_FILE_NAME}"
 
             try:
@@ -308,6 +315,19 @@ class TreeSortRunner:
 
             except Exception as e:
                raise IOError("Error copying FASTA file from workspace:\n %s" % str(e))
+
+         elif input_source == InputSource.FastaData.value:
+      
+            # Create the input filename, including its full path.
+            self.input_filename = f"{self.input_directory}/{INPUT_FASTA_FILE_NAME}"
+
+            try:
+               # Create a file that contains the input FASTA data.
+               with open(self.input_filename, "w+") as input_file:
+                  input_file.write(str(self.job_data.input_fasta_data))
+
+            except Exception as e:
+               raise IOError(f"Error copying FASTA data to input file:\n {e}\n")
 
          else:
             raise ValueError(f"Invalid input source: {input_source}")
@@ -320,7 +340,12 @@ class TreeSortRunner:
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
             raise IOError("Input FASTA file is invalid or empty")
 
+         # TESTING
+         start_time = time.time()
+
          # Remove invalid characters from FASTA headers.
+         # TODO: Since we're already iterating over the file contents, this might be a good place
+         # to split the file into multiple files by segment.
          with open(self.input_filename, 'r+') as f:
             data = ""
             for line in f:
@@ -335,6 +360,10 @@ class TreeSortRunner:
             f.seek(0)
             f.write(data)
             f.truncate()
+
+         # TESTING
+         end_time = time.time()
+         print(f"Time taken to process input file: {end_time - start_time:.2f} seconds")
 
       except Exception as e:
          sys.stderr.write(f"Error processing input file:\n {e}\n")
@@ -470,17 +499,20 @@ def main(argv=None):
       sys.stderr.write(f"Unable to create an instance of TreeSortRunner:\n{e}\n")
       sys.exit(-1)
    
-   # Prepare the input file
-   if not runner.prepare_input_file():
-      traceback.print_exc(file=sys.stderr)
-      sys.stderr.write("An error occurred in prepare_input_file\n")
-      sys.exit(-1)
+   # Should we prepare the dataset?
+   if runner.job_data.prepare_dataset:
+      
+      # Prepare the input file
+      if not runner.prepare_input_file():
+         traceback.print_exc(file=sys.stderr)
+         sys.stderr.write("An error occurred in prepare_input_file\n")
+         sys.exit(-1)
 
-   # Prepare the dataset
-   if not runner.prepare_dataset():
-      traceback.print_exc(file=sys.stderr)
-      sys.stderr.write("An error occurred in prepare_dataset\n")
-      sys.exit(-1)
+      # Prepare the dataset
+      if not runner.prepare_dataset():
+         traceback.print_exc(file=sys.stderr)
+         sys.stderr.write("An error occurred in prepare_dataset\n")
+         sys.exit(-1)
 
    # Run TreeSort
    """if not runner.tree_sort():

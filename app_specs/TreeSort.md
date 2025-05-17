@@ -15,7 +15,7 @@ It takes the following parameters:
 | clades_path | Clades path | string | ??? | |
 | deviation | Deviation | float? | | 2 |
 | equal_rates | Equal rates | boolean | | |
-| inference_type | Inference type | FastTree, IQ-Tree | | IQ-Tree |
+| input_existing_directory | Existing directory | string | | |
 | input_fasta_data | Input FASTA data | string | | |
 | input_fasta_file_id | Input FASTA file ID | wsid | | |
 | input_source | Input source | fasta_data, fasta_file_id | :heavy_check_mark: | fasta_file_id |
@@ -24,10 +24,12 @@ It takes the following parameters:
 | match_on_regex | Match on RegEx | string (regex) |  | ??? |
 | match_on_strain | Match on strain? | boolean |  | |
 | method | Method | local, mincut | :heavy_check_mark: | local |
-| no_collapse | No collapse | boolean |  | ??? |
-| output_path | Output path | string | ??? | |
+| no_collapse | No collapse | boolean | | |
+| output_path | Output path | string | :heavy_check_mark: | |
+| prepare_dataset | Prepare a FASTA file first? | boolean |  |  |
 | p_value | P-value | float | | 0.001 |
 | ref_segment | Reference Segment | string | :heavy_check_mark: | HA |
+| ref_tree_inference | Reference tree inference method | FastTree, IQTree | | IQTree |
 | segments | Segments | string | :heavy_check_mark: | All segments |
 
 
