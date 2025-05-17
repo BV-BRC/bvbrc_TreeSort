@@ -6,6 +6,7 @@ from enum import Enum
 import json
 import os
 import re
+#import shutil # For deleting files and directories
 import subprocess
 import sys
 import time
@@ -67,6 +68,7 @@ class TreeInference(str, Enum):
    IQTree = "IQ-Tree"
    # RAxML = "RAxML" # Not implemented yet
  
+
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define utility functions
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +79,6 @@ def safeTrim(text: str|None):
       return ""
    else:
       return text.strip()
-
 
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define classes
@@ -114,6 +115,9 @@ class TreeSortRunner:
 
    # The base URL
    base_url: str
+
+   # Segments found in the input FASTA file.
+   fasta_segments: list[str]
 
    # the name of the directory containing the input FASTA file.
    input_directory: str
@@ -166,6 +170,19 @@ class TreeSortRunner:
          raise ValueError("Job data in the constructor is invalid")
       
       
+   # Find the segment name in a FASTA header.
+   def get_segment_from_header(self, header: str) -> str | None:
+
+      segment = None
+
+      for segment_name in VALID_SEGMENTS:
+         if re.search(f"|{segment_name}|", header, re.IGNORECASE):
+            segment = segment_name
+            break
+
+      return segment
+   
+
    # Is the JobData instance valid?
    def is_job_data_valid(self) -> bool:
 
@@ -246,53 +263,39 @@ class TreeSortRunner:
       return True
    
 
-   # Build alignments and trees and compile a descriptor file.
    def prepare_dataset(self) -> bool:
 
-      sys.stdout.write("In prepare_dataset\n\n")
+      sys.stdout.write("In run_prepare_dataset\n\n")
       
       # The result status defaults to false.
       result_status = False
 
-      try:
-         # Example usage: ./prepare_dataset.sh segments.fasta HA myoutdir
-         # TODO: Replace this with the actual script name!
-         cmd = ["prepare_dataset_051625.sh"]
+      # NOTE: prepare_dataset.sh deleted and recreated the working directory
+      # at this point, but we don't need to do that here as the working directory
+      # was just created and is empty.
+      
+      # Split the input FASTA file into multiple files by segment.
+      self.split_fasta_by_segment()
 
-         # Should --fast be added?
-         # TODO: Support FastTree, IQ-Tree, and RAxML
-         if (self.job_data.ref_tree_inference and self.job_data.ref_tree_inference == TreeInference.FastTree.value):
-            cmd.append(ScriptOption.FastTree.value)
+      # Run mafft to align the segments.
 
-         # The segments (optional)
-         if self.job_data.segments:
-            cmd.append(ScriptOption.Segments.value)
-            cmd.append(self.job_data.segments)
 
-         # The input FASTA file
-         cmd.append(self.input_filename)
+      # Remove the segment-specific FASTA files.
 
-         # The reference segment
-         refSegment = self.job_data.ref_segment
-         if refSegment:
-            cmd.append(refSegment)
 
-         # The output directory
-         cmd.append(self.work_directory)
+      # Iterate over all valid segments and:
+      # 1. Build reference trees for each segment. Note that the reference segment
+      #    might be handled differently.
+      #
+      # 2. Root trees with treetime
 
-         # TEST
-         print(f"{' '.join(cmd)}\n\n")
 
-         result = subprocess.call(cmd, shell=False)
-         if result == 0:
-            result_status = True
+      # Create the descriptor file.
 
-      except ValueError as e:
-         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
-         return False
-         
+
+
       return result_status
-     
+
 
    # Determine the source of the FASTA input file and prepare it for use.
    def prepare_input_file(self) -> bool:
@@ -370,6 +373,103 @@ class TreeSortRunner:
          return False
       
       return True
+
+
+   # Run prepare_dataset.sh to build alignments and trees and compile a descriptor file.
+   def run_prepare_dataset(self) -> bool:
+
+      sys.stdout.write("In run_prepare_dataset\n\n")
+      
+      # The result status defaults to false.
+      result_status = False
+
+      try:
+         # Example usage: ./prepare_dataset.sh segments.fasta HA myoutdir
+         # TODO: Replace this with the actual script name!
+         cmd = ["prepare_dataset_051625.sh"]
+
+         # Should --fast be added?
+         # TODO: Support FastTree, IQ-Tree, and RAxML
+         if (self.job_data.ref_tree_inference and self.job_data.ref_tree_inference == TreeInference.FastTree.value):
+            cmd.append(ScriptOption.FastTree.value)
+
+         # The segments (optional)
+         if self.job_data.segments:
+            cmd.append(ScriptOption.Segments.value)
+            cmd.append(self.job_data.segments)
+
+         # The input FASTA file
+         cmd.append(self.input_filename)
+
+         # The reference segment
+         refSegment = self.job_data.ref_segment
+         if refSegment:
+            cmd.append(refSegment)
+
+         # The output directory
+         cmd.append(self.work_directory)
+
+         # TEST
+         print(f"{' '.join(cmd)}\n\n")
+
+         result = subprocess.call(cmd, shell=False)
+         if result == 0:
+            result_status = True
+
+      except ValueError as e:
+         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
+         return False
+         
+      return result_status
+     
+
+   # Split a FASTA file containing sequences for multiple segments into individual 
+   # files for each segment found in the FASTA headers.
+   def split_fasta_by_segment(self) -> bool:
+
+      # A dictionary of lines of FASTA keyed by segment name.
+      fasta_by_segment = {}
+
+      with open(self.input_filename, 'r') as f:
+         
+         current_segment = None
+
+         # Iterate over every line in the file.
+         for line in f:
+            if line.startswith(">"):
+               header = line.strip()
+               # header = re.sub(INVALID_FASTA_CHARS, "", header)
+               # header = re.sub(" ", "_", header)
+               current_segment = self.get_segment_from_header(header)
+
+               line = f"{header}\n"
+
+            if not current_segment:
+               continue
+            
+            # Update the list of FASTA segments we have encountered.
+            if not current_segment in self.fasta_segments:
+               self.fasta_segments.append(current_segment)
+
+            # Found the segment in the header.
+            if current_segment in fasta_by_segment:
+               fasta_by_segment[current_segment] += line
+            else:
+               fasta_by_segment[current_segment] = line
+
+         # Write the contents of fasta_by_segment to new FASTA files.
+         for segment in fasta_by_segment.keys():
+
+            fasta = fasta_by_segment[segment]
+            if not fasta or len(fasta) < 1:
+               continue
+
+            with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
+               fasta_file.write(fasta)
+               fasta_file.close()
+         
+      return True
+
 
 
    # Run TreeSort in a sub-process.
@@ -509,7 +609,7 @@ def main(argv=None):
          sys.exit(-1)
 
       # Prepare the dataset
-      if not runner.prepare_dataset():
+      if not runner.run_prepare_dataset():
          traceback.print_exc(file=sys.stderr)
          sys.stderr.write("An error occurred in prepare_dataset\n")
          sys.exit(-1)
