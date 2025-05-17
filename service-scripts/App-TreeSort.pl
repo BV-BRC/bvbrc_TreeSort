@@ -50,12 +50,12 @@ sub process_treesort
    my $ws = $app->workspace();
 
    # Uncomment to print user info.
-   my @cmd = ("p3-whoami");
-   IPC::Run::run(\@cmd);
+   #my @cmd = ("p3-whoami");
+   #IPC::Run::run(\@cmd);
 
    # Create a temp directory for intermediate calculations/results.
-   # DMD TEST: Commented out the cleanup so the directory won't be deleted.
-   my $cwd = File::Temp->newdir(); # CLEANUP => 1 );
+   # DMD TEST: Don't clean up the temp directory when we're testing.
+   my $cwd = File::Temp->newdir(CLEANUP => 0); # CLEANUP => 1 );
 
    # Create an "input" subdirectory for the input FASTA file, etc.
    my $input_dir = "$cwd/input";
@@ -88,13 +88,16 @@ sub process_treesort
    # Run the Python script that runs TreeSort.
    my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
    my $ok = run(\@cmd);
+
+   # TODO: This is for testing purposes and can be deleted.
+   print "Contents of the staging directory after running TreeSort:\n";
+   print `ls -l $stage_dir`."\n";
+
+   # Was the command successful?
    if (!$ok)
    {
       die "Command failed: @cmd\n";
    }
-
-   # TODO: This is for testing purposes and can be deleted.
-   print `ls -l $stage_dir`."\n";
 
    # A modifiable version of the workspace's result folder name.
    my $result_folder = $app->result_folder;
