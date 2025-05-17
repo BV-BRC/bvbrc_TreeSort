@@ -477,8 +477,11 @@ class TreeSortRunner:
          # Write the contents of fasta_by_segment to new FASTA files.
          for segment in fasta_by_segment.keys():
 
+            print(f"segment key = {segment}")
+
             fasta = fasta_by_segment[segment]
             if not fasta or len(fasta) < 1:
+               print("no fasta for this key")
                continue
 
             with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
