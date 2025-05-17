@@ -268,7 +268,7 @@ class TreeSortRunner:
 
    def prepare_dataset(self) -> bool:
 
-      sys.stdout.write("In run_prepare_dataset\n\n")
+      sys.stdout.write("In prepare_dataset\n\n")
       
       # The result status defaults to false.
       result_status = False
@@ -441,8 +441,14 @@ class TreeSortRunner:
          
          current_segment = None
 
+         line_count = 0
+
          # Iterate over every line in the file.
          for line in f:
+
+            if line_count % 20 == 0:
+               print(f"line number {line_count}")
+
             if line.startswith(">"):
                header = line.strip()
                # header = re.sub(INVALID_FASTA_CHARS, "", header)
@@ -458,11 +464,15 @@ class TreeSortRunner:
             if not current_segment in self.fasta_segments:
                self.fasta_segments.append(current_segment)
 
+               print(f"Just added segment {current_segment}")
+
             # Found the segment in the header.
             if current_segment in fasta_by_segment:
                fasta_by_segment[current_segment] += line
             else:
                fasta_by_segment[current_segment] = line
+
+            line_count += 1
 
          # Write the contents of fasta_by_segment to new FASTA files.
          for segment in fasta_by_segment.keys():
