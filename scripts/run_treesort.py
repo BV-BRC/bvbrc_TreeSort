@@ -179,7 +179,7 @@ class TreeSortRunner:
       segment = None
 
       for segment_name in VALID_SEGMENTS:
-         if re.search(f"|{segment_name}|", header, re.IGNORECASE):
+         if re.search(rf"\|{segment_name}\|", header, re.IGNORECASE):
             segment = segment_name
             break
 
@@ -482,8 +482,8 @@ class TreeSortRunner:
 
             try:
                print(f"fasta = {fasta}\n")
-               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
-                  fasta_file.write(fasta)
+               #with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
+               #   fasta_file.write(fasta)
 
             except Exception as e:
                sys.stderr.write(f"Error creating FASTA file for {segment}:\n {e}\n")
