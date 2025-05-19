@@ -176,14 +176,14 @@ class TreeSortRunner:
    # Find the segment name in a FASTA header.
    def get_segment_from_header(self, header: str) -> str | None:
 
-      segment = None
+      result = None
 
       for segment_name in VALID_SEGMENTS:
          if re.search(rf"\|{segment_name}\|", header, re.IGNORECASE):
-            segment = segment_name
+            result = segment_name
             break
 
-      return segment
+      return result
    
 
    # Is the JobData instance valid?
@@ -446,12 +446,16 @@ class TreeSortRunner:
          # Iterate over every line in the file.
          for line in f:
 
+            #print(f"{line}\n")
+
             if line.startswith(">"):
                header = line.strip()
                # header = re.sub(INVALID_FASTA_CHARS, "", header)
                # header = re.sub(" ", "_", header)
                current_segment = self.get_segment_from_header(header)
 
+               #print(f"In the header, current segment = {current_segment}")
+               
                line = f"{header}\n"
 
             if not current_segment:
@@ -478,12 +482,11 @@ class TreeSortRunner:
             fasta = fasta_by_segment.get(segment)
             if not fasta or len(fasta) < 1:
                print("no fasta for this key")
-               continue
-
+               continue 
+            
             try:
-               print(f"fasta = {fasta}\n")
-               #with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
-               #   fasta_file.write(fasta)
+               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
+                  fasta_file.write(fasta)
 
             except Exception as e:
                sys.stderr.write(f"Error creating FASTA file for {segment}:\n {e}\n")
@@ -630,16 +633,16 @@ def main(argv=None):
          sys.exit(-1)
 
       # Prepare the dataset
-      if not runner.prepare_dataset():
+      if not runner.run_prepare_dataset():
          traceback.print_exc(file=sys.stderr)
          sys.stderr.write("An error occurred in prepare_dataset\n")
          sys.exit(-1)
 
    # Run TreeSort
-   """if not runner.tree_sort():
+   if not runner.tree_sort():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in tree_sort\n")
-      sys.exit(-1)"""
+      sys.exit(-1)
 
 
 if __name__ == "__main__" :
