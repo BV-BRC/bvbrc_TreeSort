@@ -456,11 +456,14 @@ class TreeSortRunner:
 
                #print(f"In the header, current segment = {current_segment}")
                
-               line = f"{header}\n"
+               line = header
 
             if not current_segment:
                continue
             
+            # Append a new line character to the end of the line.
+            line = f"{line}\n"
+
             # Update the list of FASTA segments we have encountered.
             if not current_segment in self.fasta_segments:
                self.fasta_segments.append(current_segment)
