@@ -352,13 +352,10 @@ class TreeSortRunner:
          if not os.path.exists(self.input_filename) or os.path.getsize(self.input_filename) == 0:
             raise IOError("Input FASTA file is invalid or empty")
 
-         # TESTING
-         start_time = time.time()
-
          # Remove invalid characters from FASTA headers.
          # TODO: Since we're already iterating over the file contents, this might be a good place
          # to split the file into multiple files by segment.
-         with open(self.input_filename, 'r+') as f:
+         """with open(self.input_filename, 'r+') as f:
             data = ""
             for line in f:
                if line.startswith(">"):
@@ -371,11 +368,7 @@ class TreeSortRunner:
 
             f.seek(0)
             f.write(data)
-            f.truncate()
-
-         # TESTING
-         end_time = time.time()
-         print(f"Time taken to process input file: {end_time - start_time:.2f} seconds")
+            f.truncate()"""
 
       except Exception as e:
          sys.stderr.write(f"Error processing input file:\n {e}\n")
