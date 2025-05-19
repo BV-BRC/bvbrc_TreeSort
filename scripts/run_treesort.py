@@ -6,7 +6,6 @@ from enum import Enum
 import json
 import os
 import re
-#import shutil # For deleting files and directories
 import subprocess
 import sys
 import time
@@ -16,6 +15,9 @@ from typing import Optional
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define constants
 #-----------------------------------------------------------------------------------------------------------------------------
+
+# The BV-BRC URL
+BVBRC_URL = "https://www.bv-brc.org"
 
 # The default reference segment.
 DEFAULT_REF_SEGMENT = "HA"
@@ -79,6 +81,7 @@ def safeTrim(text: str|None):
       return ""
    else:
       return text.strip()
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 # Define classes
@@ -160,7 +163,7 @@ class TreeSortRunner:
       if "P3_BASE_URL" in os.environ:
          self.base_url = os.environ["P3_BASE_URL"]
       else:
-         self.base_url = "https://www.bv-brc.org"
+         self.base_url = BVBRC_URL
 
       # Validate the job data.
       if not job_data:
@@ -172,19 +175,6 @@ class TreeSortRunner:
       if not self.is_job_data_valid():
          raise ValueError("Job data in the constructor is invalid")
       
-      
-   # Find the segment name in a FASTA header.
-   def get_segment_from_header(self, header: str) -> str | None:
-
-      result = None
-
-      for segment_name in VALID_SEGMENTS:
-         if re.search(rf"\|{segment_name}\|", header, re.IGNORECASE):
-            result = segment_name
-            break
-
-      return result
-   
 
    # Is the JobData instance valid?
    def is_job_data_valid(self) -> bool:
@@ -266,46 +256,6 @@ class TreeSortRunner:
       return True
    
 
-   def prepare_dataset(self) -> bool:
-
-      sys.stdout.write("In prepare_dataset\n\n")
-      
-      # The result status defaults to false.
-      result_status = False
-
-      # NOTE: prepare_dataset.sh deleted and recreated the working directory
-      # at this point, but we don't need to do that here as the working directory
-      # was just created and is empty.
-      
-      try:
-
-         # Split the input FASTA file into multiple files by segment.
-         self.split_fasta_by_segment()
-
-         # Run mafft to align the segments.
-
-
-         # Remove the segment-specific FASTA files.
-
-
-         # Iterate over all valid segments and:
-         # 1. Build reference trees for each segment. Note that the reference segment
-         #    might be handled differently.
-         #
-         # 2. Root trees with treetime
-
-
-         # Create the descriptor file.
-
-         result_status = True
-
-      except Exception as e:
-         sys.stderr.write(f"Error preparing dataset:\n {e}\n")
-         return False
-
-      return result_status
-
-
    # Determine the source of the FASTA input file and prepare it for use.
    def prepare_input_file(self) -> bool:
 
@@ -386,9 +336,8 @@ class TreeSortRunner:
       result_status = False
 
       try:
-         # Example usage: ./prepare_dataset.sh segments.fasta HA myoutdir
-         # TODO: Replace this with the actual script name!
-         cmd = ["prepare_dataset_051625.sh"]
+         # Example usage: ./prepare_treesort_dataset.sh segments.fasta HA myoutdir
+         cmd = ["prepare_treesort_dataset.sh"]
 
          # Should --fast be added?
          # TODO: Support FastTree, IQ-Tree, and RAxML
@@ -423,73 +372,6 @@ class TreeSortRunner:
          return False
          
       return result_status
-     
-
-   # Split a FASTA file containing sequences for multiple segments into individual 
-   # files for each segment found in the FASTA headers.
-   def split_fasta_by_segment(self) -> bool:
-
-      # A dictionary of lines of FASTA keyed by segment name.
-      fasta_by_segment = {}
-
-      with open(self.input_filename, 'r') as f:
-         
-         current_segment = None
-
-         # Iterate over every line in the file.
-         for line in f:
-
-            #print(f"{line}\n")
-
-            if line.startswith(">"):
-               header = line.strip()
-               # header = re.sub(INVALID_FASTA_CHARS, "", header)
-               # header = re.sub(" ", "_", header)
-               current_segment = self.get_segment_from_header(header)
-
-               #print(f"In the header, current segment = {current_segment}")
-               
-               line = header
-
-            if not current_segment:
-               continue
-            
-            # Append a new line character to the end of the line.
-            line = f"{line}\n"
-
-            # Update the list of FASTA segments we have encountered.
-            if not current_segment in self.fasta_segments:
-               self.fasta_segments.append(current_segment)
-
-               print(f"Just added segment {current_segment}")
-
-            # Found the segment in the header.
-            if current_segment in fasta_by_segment:
-               fasta_by_segment[current_segment] += line
-            else:
-               fasta_by_segment[current_segment] = line
-
-
-         # Write the contents of fasta_by_segment to new FASTA files.
-         for segment in fasta_by_segment.keys():
-
-            print(f"segment key = {segment}\n")
-
-            fasta = fasta_by_segment.get(segment)
-            if not fasta or len(fasta) < 1:
-               print("no fasta for this key")
-               continue 
-            
-            try:
-               with open(f"{self.work_directory}/{segment}-{INPUT_FASTA_FILE_NAME}", "w") as fasta_file:
-                  fasta_file.write(fasta)
-
-            except Exception as e:
-               sys.stderr.write(f"Error creating FASTA file for {segment}:\n {e}\n")
-               return False
-         
-      return True
-
 
 
    # Run TreeSort in a sub-process.
@@ -558,15 +440,16 @@ class TreeSortRunner:
 
 def main(argv=None):
     
+   # Exclude the script name.
    if argv is None:
-      argv = sys.argv[1:]  # Exclude the script name
+      argv = sys.argv[1:]  
 
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
-   parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory that will contain the FASTA input file(s)", required=True)
-   parser.add_argument("-j", "--job-filename", dest="job_filename", help="A JSON file with the job description", required=True)
+   parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory with FASTA input file(s)", required=True)
+   parser.add_argument("-j", "--job-filename", dest="job_filename", help="The job description JSON file", required=True)
    parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be created", required=True)
-   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory that will contain generated intermediate files", required=True)
+   parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where intermediate files are generated", required=True)
    
    args = parser.parse_args()
 
