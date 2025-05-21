@@ -60,22 +60,22 @@ declare -a found_segments=()
 for seg in "${segments[@]}"
 do
    # Copy all this segment's sequences into a segment-specific FASTA file.
-   seqkit grep -r -i -p "\|${seg}\|" $main_fasta > ${outdir}/${seg}-${name}
+   seqkit grep -r -i -p "\|${seg}\|" $main_fasta > "${outdir}/${seg}-${name}"
    
    # Was the FASTA file created and is it non-empty?
-   if [[ -s ${outdir}/${seg}-${name} ]]; then
+   if [[ -s "${outdir}/${seg}-${name}" ]]; then
       
       found_segments+=("$seg")
 
       echo -e "Aligning ${seg}...\n"
-      mafft --thread 6 ${outdir}/${seg}-${name} | sed "s/|${seg}|/|/g"> ${outdir}/${seg}-${name}.aln
+      mafft --thread 6 "${outdir}/${seg}-${name}" | sed "s/|${seg}|/|/g"> "${outdir}/${seg}-${name}.aln"
 
       if [ $? -ne 0 ]; then
          echo "MAFFT alignment failed"
          exit 1
       fi
 
-      rm ${outdir}/${seg}-${name}
+      rm "${outdir}/${seg}-${name}"
    fi
 done
 
@@ -85,8 +85,8 @@ if [ ${#found_segments[@]} -eq 0 ]; then
 fi
 
 # Calculate the total number of non-empty alignment files.
-aln_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.aln" | wc -l)
-empty_aln_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.aln" -empty | wc -l)
+aln_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln" | wc -l)
+empty_aln_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln" -empty | wc -l)
 
 # Were alignment files generated?
 if [ $aln_count - $empty_aln_count < 1 ]; then
@@ -121,8 +121,8 @@ else
 file
 
 # Calculate the total number of non-empty tree files.
-tre_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.tre" | wc -l)
-empty_tre_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.tre" -empty | wc -l)
+tre_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.tre" | wc -l)
+empty_tre_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.tre" -empty | wc -l)
 
 # Were tree files generated?
 if [ $tre_count - $empty_tre_count < 1 ]; then
@@ -139,8 +139,8 @@ done
 wait
 
 # Calculate the total number of non-empty rooted tree files.
-rooted_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.aln.rooted.tre" | wc -l)
-empty_rooted_count=$(find . -maxdepth 1 -type f -name "${outdir}/*.aln.rooted.tre" -empty | wc -l)
+rooted_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln.rooted.tre" | wc -l)
+empty_rooted_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln.rooted.tre" -empty | wc -l)
 
 # Were tree files generated?
 if [ $rooted_count - $empty_rooted_count < 1 ]; then
