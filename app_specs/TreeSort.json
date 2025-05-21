@@ -33,8 +33,18 @@
          "type": "boolean"
       },
       {
-         "id": "input_existing_directory",
-         "label": "Existing directory",
+         "id": "inference_method",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "local",
+         "label": "Reassortment inference method",
+         "desc": "Methods are \"local\" (default) or \"mincut\". The \"mincut\" method always determines the most parsimonious reassortment placement even in ambiguous circumstances",
+         "enum": ["local", "mincut"],
+         "type": "enum"
+      },
+      {
+         "id": "input_fasta_existing_dataset",
+         "label": "Existing dataset",
          "required": 0,
          "default": null,
          "desc": "A directory with previously generated files",
@@ -57,13 +67,21 @@
          "type": "wsid"
       },
       {
+         "id": "input_fasta_group_id",
+         "label": "Input genome group ID",
+         "required": 0,
+         "default": null,
+         "desc": "The ID of a genome (feature?) group in the workspace",
+         "type": "wsid"
+      },
+      {
          "id": "input_source",
          "allow_multiple": false,
          "required": 1,
          "default": "fasta_file_id",
          "label": "Input source",
-         "desc": "Is the input a FASTA sequence, the ID of a FASTA file in the workspace, or a directory with previously prepared files?",
-         "enum": ["fasta_data", "fasta_file_id", "prepared_files"],
+         "desc": "Is the input a FASTA sequence, the ID of a FASTA file in the workspace, a directory with previously prepared files, or a genome group from the workspace?",
+         "enum": ["fasta_data", "fasta_existing_dataset", "fasta_file_id", "fasta_group_id"],
          "type": "enum"
       },
       {
@@ -76,42 +94,24 @@
          "type": "boolean"
       },
       {
-         "id": "match_on_epi",
+         "id": "match_regex",
          "allow_multiple": false,
          "required": 0,
          "default": null,
-         "label": "Match on \"EPI_ISL_XXX\" field",
-         "desc": "Similar to \"match on strain\", but here segments are matched based on the \"EPI_ISL_XXX\" field (if present in deflines)",
-         "type": "boolean"
-      }, 
-      {
-         "id": "match_on_regex",
-         "allow_multiple": false,
-         "required": 0,
-         "default": null,
-         "label": "Match on RegEx",
+         "label": "Regular Expression for matching",
          "desc": "Provide your own custom regex to match the segments across the alignments.",
          "type": "string"
-      }, 
+      },
       {
-         "id": "match_on_strain",
+         "id": "match_type",
          "allow_multiple": false,
          "required": 0,
-         "default": null,
-         "label": "Match on strain?",
-         "desc": "Match the names (defined in FASTAs) across the segments based on the strain name. E.g., \"A/Texas/32/2021\" or \"A/swine/A0229832/Iowa/2021\". Works for flu A, B, C, and D. This way no preprocessing is needed to standardize the names before the analysis.",
-         "type": "boolean"
-      }, 
-      {
-         "id": "method",
-         "allow_multiple": false,
-         "required": 0,
-         "default": "local",
-         "label": "Reassortment inference method",
-         "desc": "Methods are \"local\" (default) or \"mincut\". The \"mincut\" method always determines the most parsimonious reassortment placement even in ambiguous circumstances",
-         "enum": ["local", "mincut"],
+         "default": "default",
+         "label": "Segment match type",
+         "desc": "How should the segments be matched across the alignments?",
+         "enum": [ "default", "epi", "regex", "strain"],
          "type": "enum"
-      }, 
+      },
       {
          "id": "no_collapse",
          "allow_multiple": false,
@@ -129,15 +129,6 @@
          "label": "Output path",
          "desc": "Path to the output file (tree will be saved in nexus format)",
          "type": "string"
-      }, 
-      {
-         "id": "prepare_dataset",
-         "allow_multiple": false,
-         "required": 1,
-         "default": 1,
-         "label": "Prepare dataset?",
-         "desc": "Should a FASTA file be prepared for reassortment analysis, or has the analysis already been done?",
-         "type": "boolean"
       }, 
       {
          "id": "p_value",
