@@ -52,7 +52,7 @@ class InputSource(str, Enum):
    # A workspace identifier for a genome group.
    FastaGroupID = "fasta_group_id"
    
-   
+
 class MatchType(str, Enum):
    Default = "default"
    EPI = "epi"
@@ -260,6 +260,11 @@ class TreeSortRunner:
                raise ValueError("The input FASTA data is invalid")
 
          
+         # Match type and match regex
+         match_regex = safeTrim(self.job_data.match_regex)
+         if self.job_data.match_type == MatchType.RegEx and len(match_regex) < 1:
+            raise ValueError("The match regular expression was not provided")
+
          # Validate the output path.
          if not self.job_data.output_path:
             raise ValueError("The output path is invalid")
@@ -268,9 +273,13 @@ class TreeSortRunner:
          refSegment = safeTrim(self.job_data.ref_segment)
          if not refSegment:
             refSegment = DEFAULT_REF_SEGMENT
-
+            
          elif not refSegment in VALID_SEGMENTS:
             raise ValueError(f"Invalid reference segment: {refSegment}")
+
+         # Reference tree inference
+         if not self.job_data.ref_tree_inference:
+            self.job_data.ref_tree_inference = TreeInference.FastTree
 
          # Validate the segments
          segments = safeTrim(self.job_data.segments)
