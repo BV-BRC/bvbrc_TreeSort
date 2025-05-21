@@ -273,7 +273,7 @@ class TreeSortRunner:
          refSegment = safeTrim(self.job_data.ref_segment)
          if not refSegment:
             refSegment = DEFAULT_REF_SEGMENT
-            
+
          elif not refSegment in VALID_SEGMENTS:
             raise ValueError(f"Invalid reference segment: {refSegment}")
 
@@ -540,7 +540,7 @@ def main(argv=None):
       sys.exit(-1)
    
    # Should we prepare the dataset?
-   if runner.job_data.input_source == InputSource.FastaExistingDataset:
+   if runner.job_data.input_source != InputSource.FastaExistingDataset:
       
       # Prepare the input file
       if not runner.prepare_input_file():
@@ -551,7 +551,7 @@ def main(argv=None):
       # Prepare the dataset
       if not runner.run_prepare_dataset():
          traceback.print_exc(file=sys.stderr)
-         sys.stderr.write("An error occurred in TreeSortRunner.prepare_dataset\n")
+         sys.stderr.write("An error occurred in TreeSortRunner.run_prepare_dataset\n")
          sys.exit(-1)
 
    # Run TreeSort
