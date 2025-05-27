@@ -88,8 +88,8 @@ if [ ${#found_segments[@]} -eq 0 ]; then
 fi
 
 # Calculate the total number of non-empty alignment files.
-aln_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln" | wc -l)
-empty_aln_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln" -empty | wc -l)
+aln_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln" | wc -l)
+empty_aln_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln" -empty | wc -l)
 
 # Were alignment files generated?
 if [ $aln_count - $empty_aln_count < 1 ]; then
@@ -124,8 +124,8 @@ else
 fi
 
 # Calculate the total number of non-empty tree files.
-tre_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.tre" | wc -l)
-empty_tre_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.tre" -empty | wc -l)
+tre_count=$(find ${outdir} -maxdepth 1 -type f -path "*.tre" | wc -l)
+empty_tre_count=$(find ${outdir} -maxdepth 1 -type f -path "*.tre" -empty | wc -l)
 
 # Were tree files generated?
 if [ $tre_count - $empty_tre_count < 1 ]; then
@@ -142,8 +142,8 @@ done
 wait
 
 # Calculate the total number of non-empty rooted tree files.
-rooted_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln.rooted.tre" | wc -l)
-empty_rooted_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.aln.rooted.tre" -empty | wc -l)
+rooted_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln.rooted.tre" | wc -l)
+empty_rooted_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln.rooted.tre" -empty | wc -l)
 
 # Were tree files generated?
 if [ $rooted_count - $empty_rooted_count < 1 ]; then
