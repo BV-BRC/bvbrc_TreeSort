@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Usage: ./prepare_dataset.sh [--segments "..." --fast] fasta_path reference_segment outdir
+# Usage: ./prepare_treesort_dataset.sh [--segments "..." --fast] fasta_path reference_segment outdir
 # Using --fast will make all trees to be inferred with FastTree.
 # By default (without --fast) the reference tree is inferred with IQ-Tree, which is recommended for better accuracy.
-# Example usage: ./prepare_dataset.sh --segments "HA,NA" segments.fasta HA myoutdir
-# Example with default segments:  ./prepare_dataset.sh segments.fasta HA myoutdir
+# Example usage: ./prepare_treesort_dataset.sh --segments "HA,NA" segments.fasta HA myoutdir
+# Example with default segments:  ./prepare_treesort_dataset.sh segments.fasta HA myoutdir
 
 # These are the default segment names
 declare -a segments=("PB2" "PB1" "PA" "HA" "NP" "NA" "MP" "NS")
@@ -60,7 +60,10 @@ declare -a found_segments=()
 for seg in "${segments[@]}"
 do
    # Copy all this segment's sequences into a segment-specific FASTA file.
-   seqkit grep -r -i -p "\|${seg}\|" $main_fasta > "${outdir}/${seg}-${name}"
+   cat $main_fasta | smof grep "|${seg}|" > "${outdir}/${seg}-${name}"
+
+   # NOTE: Seqkit can be used instead of smof, if necessary.
+   #seqkit grep -r -i -p "\|${seg}\|" $main_fasta > "${outdir}/${seg}-${name}"
    
    # Was the FASTA file created and is it non-empty?
    if [[ -s "${outdir}/${seg}-${name}" ]]; then
@@ -115,10 +118,10 @@ else
 	echo -e "Building trees in parallel with FastTree...\n"
 	for seg in "${found_segments[@]}"
 	do
-		fasttree -nt -gtr -gamma ${outdir}/${seg}-${name}.aln > ${outdir}/${seg}-${name}.tre &
+		fasttree -nt -gtr -gamma "${outdir}/${seg}-${name}.aln" > "${outdir}/${seg}-${name}.tre" &
 	done
 	wait  # Wait to finish.
-file
+fi
 
 # Calculate the total number of non-empty tree files.
 tre_count=$(find . -maxdepth 1 -type f -path "${outdir}/*.tre" | wc -l)
@@ -134,7 +137,7 @@ fi
 echo -e "Rooting trees with TreeTime...\n"
 for seg in "${found_segments[@]}"
 do
-	treetime-root.py ${outdir}/${seg}-${name}.tre ${outdir}/${seg}-${name}.aln &
+	treetime-root.py "${outdir}/${seg}-${name}.tre" "${outdir}/${seg}-${name}.aln" &
 done
 wait
 
@@ -160,4 +163,3 @@ done
 echo -e "The descriptor file was written to ${descriptor}\n"
 
 exit 0
-
