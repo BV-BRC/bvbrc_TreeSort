@@ -158,7 +158,7 @@ do
 	if [ $seg == $ref_seg ]; then
 		echo -n "*" >> $descriptor
 	fi
-	echo "${seg},${seg}-${name}.aln,${seg}-${name}.aln.rooted.tre" >> $descriptor
+	echo "${seg},${outdir}/${seg}-${name}.aln,${outdir}/${seg}-${name}.aln.rooted.tre" >> $descriptor
 done
 echo -e "The descriptor file was written to ${descriptor}\n"
 
