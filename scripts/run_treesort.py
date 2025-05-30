@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 import os
+import shutil
 import subprocess
 import sys
 import traceback
@@ -28,6 +29,13 @@ INPUT_FASTA_FILE_NAME = "input.fasta"
 
 # Characters to remove from FASTA headers.
 #INVALID_FASTA_CHARS = "[\\['\"(),;:\\]]"
+
+# The name of the result directories created by TreeSort will begin
+# with a segment name and end with this suffix.
+RESULT_DIRECTORY_SUFFIX = "-input.fasta.aln.treetime"
+
+# The result files created by TreeSort for every segment.
+RESULT_FILENAMES = [ "outliers.tsv", "root_to_tip_regression.pdf", "rtt.csv" ]
 
 # A list of valid segments for the influenza virus.
 VALID_SEGMENTS = ["PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"]
@@ -361,6 +369,56 @@ class TreeSortRunner:
       return True
 
 
+   # Validate the TreeSort results and copy them to the staging directory.
+   def process_results(self) -> bool:
+
+      segments = None
+      strSegments = safeTrim(self.job_data.segments)
+      if len(strSegments) < 1:
+         # Since no segments were proviced, use all segments.
+         segments = VALID_SEGMENTS
+      else:
+         # Split the segment subset into a list.
+         segments = strSegments.split(",")
+
+      missingSegments = []
+
+      # Iterate over the segments.
+      for segment in segments:
+
+         segment = safeTrim(segment)
+         if len(segment) < 1:
+            continue
+
+         # The full path of the segment's result directory.
+         directory = f"{self.work_directory}/{segment}{RESULT_DIRECTORY_SUFFIX}"
+
+         # Does this directory exist?
+         if not os.path.isdir(directory):
+            missingSegments.append(segment)
+            continue
+
+         filesExist = True
+
+         # Make sure result files exist for all segments in the analysis.
+         for filename in RESULT_FILENAMES:
+            if not os.path.exists(f"{directory}/{filename}"):
+               filesExist = False
+
+         if not filesExist:
+            missingSegments.append(segment)
+            continue
+
+         # Copy the entire directory to the staging directory.
+         shutil.copytree(directory, f"{self.staging_directory}/{segment}{RESULT_DIRECTORY_SUFFIX}")
+      
+      # Were there any segments without results?
+      if len(missingSegments) > 0:
+         sys.stderr.write(f"No results were generated for the following segment(s): {','.join(missingSegments)}\n\n")
+         return False
+
+      return True
+   
    # Run prepare_dataset.sh to build alignments and trees and compile a descriptor file.
    def run_prepare_dataset(self) -> bool:
 
@@ -446,7 +504,7 @@ class TreeSortRunner:
          if self.job_data.no_collapse:
             cmd.append(ScriptOption.NoCollapse.value)
 
-          # Always add the output path (staging directory)
+          # Always add the output path
          cmd.append(ScriptOption.OutputPath.value)
          cmd.append(self.staging_directory)
          
@@ -474,7 +532,7 @@ class TreeSortRunner:
 
 
 
-def main(argv=None):
+def main(argv=None) -> bool:
     
    # Exclude the script name.
    if argv is None:
@@ -560,7 +618,14 @@ def main(argv=None):
       sys.stderr.write("An error occurred in TreeSortRunner.tree_sort\n")
       sys.exit(-1)
 
+   # Validate the TreeSort results and copy them to the staging directory.
+   return runner.process_results()
+
 
 if __name__ == "__main__" :
-   main()
+   result = main()
+   if result:
+      sys.exit(0)
+   else:
+      sys.exit(1)
    
