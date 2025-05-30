@@ -506,7 +506,7 @@ class TreeSortRunner:
 
           # Always add the output path
          cmd.append(ScriptOption.OutputPath.value)
-         cmd.append(self.staging_directory)
+         cmd.append(f"{self.staging_directory}/testFile")
          
          # Equal rates
          if self.job_data.equal_rates:
