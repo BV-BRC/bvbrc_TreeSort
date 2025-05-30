@@ -132,7 +132,7 @@ sub process_treesort
          my $ok = IPC::Run::run(\@cmd);
          if (!$ok)
          {
-               warn "Error $? copying output with @cmd\n";
+            warn "Error $? copying output with @cmd\n";
          }
       } 
       closedir($dh);
