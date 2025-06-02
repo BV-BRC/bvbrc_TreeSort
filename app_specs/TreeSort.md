@@ -25,6 +25,7 @@ It takes the following parameters:
 | match_type  | Match on the "EPI_ISL_XXX" field, a regular expression, the strain, or the default | default, epi, regex, strain |  | default |
 | method | Method | local, mincut | :heavy_check_mark: | local |
 | no_collapse | No collapse | boolean | | |
+| output_filename | Output filename | string | :heavy_check_mark: | |
 | output_path | Output path | string | :heavy_check_mark: | |
 | p_value | P-value | float | | 0.001 |
 | ref_segment | Reference Segment | string | :heavy_check_mark: | HA |

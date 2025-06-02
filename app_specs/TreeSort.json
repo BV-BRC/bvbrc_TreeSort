@@ -120,14 +120,23 @@
          "label": "No collapse",
          "desc": "Do not collapse near-zero length branches into multifurcations (by default, TreeSort collapses all branches shorter than 1e-7 and then optimizes the multifurcations).",
          "type": "boolean"
-      }, 
+      },
+      {
+         "id": "output_filename",
+         "allow_multiple": false,
+         "required": 1,
+         "default": null,
+         "label": "Output path",
+         "desc": "The name of the output file (a tree file in nexus format)",
+         "type": "string"
+      },
       {
          "id": "output_path",
          "allow_multiple": false,
-         "required": 0,
+         "required": 1,
          "default": null,
          "label": "Output path",
-         "desc": "Path to the output file (tree will be saved in nexus format)",
+         "desc": "Path to the output file",
          "type": "string"
       }, 
       {

@@ -126,7 +126,7 @@ sub process_treesort
       {
          next if $p =~ /^\./;
 
-         # Use the p3 utility to copy the output files to the workspace.
+         # Use the p3 utility to copy the staged files to the user's workspace.
          my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/$p", "ws:" . $result_folder);
          print "@cmd\n";
          my $ok = IPC::Run::run(\@cmd);

@@ -87,7 +87,7 @@ class ScriptOption(str, Enum):
    MatchOnStrain = "--match-on-strain"
    Method = "-m"
    NoCollapse = "--no-collapse"
-   OutputPath = "-o"
+   OutputFilename = "-o"
    PValue = "--pvalue"
    Segments = "--segments"
 
@@ -131,6 +131,7 @@ class JobData:
    match_regex: Optional[str]
    match_type: Optional[MatchType]
    no_collapse: bool
+   output_filename: str
    output_path: str
    p_value: float
    ref_segment: str
@@ -277,6 +278,10 @@ class TreeSortRunner:
          if not self.job_data.output_path:
             raise ValueError("The output path is invalid")
 
+         # Validate the output filename
+         if not self.job_data.output_filename:
+            raise ValueError("The output filename is invalid")
+         
          # Validate the reference segment and provide a default if not provided.
          refSegment = safeTrim(self.job_data.ref_segment)
          if not refSegment:
@@ -449,7 +454,7 @@ class TreeSortRunner:
          if refSegment:
             cmd.append(refSegment)
 
-         # The output directory
+         # The working directory
          cmd.append(self.work_directory)
 
          # TEST
@@ -504,9 +509,9 @@ class TreeSortRunner:
          if self.job_data.no_collapse:
             cmd.append(ScriptOption.NoCollapse.value)
 
-          # Always add the output path
-         cmd.append(ScriptOption.OutputPath.value)
-         cmd.append(f"{self.staging_directory}/testFile")
+         # The name of the output file to create in the staging directory. 
+         cmd.append(ScriptOption.OutputFilename.value)
+         cmd.append(f"{self.staging_directory}/{self.job_data.output_filename}")
          
          # Equal rates
          if self.job_data.equal_rates:
@@ -542,7 +547,7 @@ def main(argv=None) -> bool:
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
    parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory with FASTA input file(s)", required=True)
    parser.add_argument("-j", "--job-filename", dest="job_filename", help="The job description JSON file", required=True)
-   parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be created", required=True)
+   parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be copied", required=True)
    parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where intermediate files are generated", required=True)
    
    args = parser.parse_args()
