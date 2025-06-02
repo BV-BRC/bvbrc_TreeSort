@@ -12,6 +12,7 @@
    "match_regex": null,
    "match_type": "default",
    "no_collapse": true,
+   "output_filename": "resultFile_060225",
    "output_path": "/ddempsey@bvbrc/home/TreeSort/swine_H1/output",
    "p_value": 0.001,
    "ref_segment": "HA",
