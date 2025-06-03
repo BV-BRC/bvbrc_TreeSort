@@ -89,9 +89,6 @@ sub process_treesort
    my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
    my $ok = run(\@cmd);
 
-   # TEST
-   print "ok = ".$ok;
-
    # TODO: This is for testing purposes and can be deleted.
    print "Contents of the staging directory after running TreeSort:\n";
    print `ls -l $stage_dir`."\n";
@@ -100,20 +97,19 @@ sub process_treesort
    if (!$ok)
    {
       die "Command failed: @cmd\n";
+      exit 1;
    }
 
    # A modifiable version of the workspace's result folder name.
    my $result_folder = $app->result_folder;
 
-   # TEST
-   print "Before modification, result_folder = $result_folder\n";
+   # Make sure the result folder name doesn't end with "/.".
+   if ($result_folder =~ m{/\.$})
+   {
+      $result_folder = substr $result_folder, 0, -2;
+   }
 
-   # Make sure the result folder name doesn't end with a period or slash.
-   # TODO: Why would it end with a period?
-   #if (substr $result_folder, -1 eq "." || substr $result_folder, -1 eq "/")
-   #{
-   #   $result_folder = substr $result_folder, 0, -1;
-   #}
+   print "Result folder is now $result_folder";
 
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
