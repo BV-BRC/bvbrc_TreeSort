@@ -89,6 +89,9 @@ sub process_treesort
    my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
    my $ok = run(\@cmd);
 
+   # TEST
+   print "ok = ".$ok;
+
    # TODO: This is for testing purposes and can be deleted.
    print "Contents of the staging directory after running TreeSort:\n";
    print `ls -l $stage_dir`."\n";
@@ -121,20 +124,15 @@ sub process_treesort
    # Copy the files from the staging directory to the workspace.
    if (opendir(my $dh, $stage_dir))
    {
-      # Iterate over the files in the staging directory.
-      while (my $p = readdir($dh))
+      # Use the p3 utility to copy the staged files to the user's workspace.
+      my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/", "ws:" . $result_folder);
+      print "@cmd\n";
+      my $ok = IPC::Run::run(\@cmd);
+      if (!$ok)
       {
-         next if $p =~ /^\./;
-
-         # Use the p3 utility to copy the staged files to the user's workspace.
-         my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/$p", "ws:" . $result_folder);
-         print "@cmd\n";
-         my $ok = IPC::Run::run(\@cmd);
-         if (!$ok)
-         {
-            warn "Error $? copying output with @cmd\n";
-         }
-      } 
+         warn "Error $? copying output with @cmd\n";
+      }
+      
       closedir($dh);
    }
    else
