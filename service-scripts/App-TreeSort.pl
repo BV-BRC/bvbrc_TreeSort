@@ -105,9 +105,12 @@ sub process_treesort
    # A modifiable version of the workspace's result folder name.
    my $result_folder = $app->result_folder;
 
-   # Make sure the result folder name doesn't end with a period.
-   # TODO: Why does it end with a period?
-   if (substr $result_folder, -1 eq ".")
+   # TEST
+   print "Before modification, result_folder = $result_folder\n";
+
+   # Make sure the result folder name doesn't end with a period or slash.
+   # TODO: Why would it end with a period?
+   if (substr $result_folder, -1 eq "." || substr $result_folder, -1 eq "/")
    {
       $result_folder = substr $result_folder, 0, -1;
    }
