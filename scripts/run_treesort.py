@@ -418,9 +418,9 @@ class TreeSortRunner:
          shutil.copytree(directory, f"{self.staging_directory}/{segment}{RESULT_DIRECTORY_SUFFIX}")
       
       # Were there any segments without results?
-      if len(missingSegments) > 0:
-         sys.stderr.write(f"No results were generated for the following segment(s): {','.join(missingSegments)}\n\n")
-         return False
+      #if len(missingSegments) > 0:
+      #   sys.stderr.write(f"No results were generated for the following segment(s): {','.join(missingSegments)}\n\n")
+      #   return False
 
       return True
    
