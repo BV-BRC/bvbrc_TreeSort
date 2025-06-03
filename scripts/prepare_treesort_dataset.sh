@@ -78,8 +78,10 @@ do
          exit 1
       fi
 
-      rm "${outdir}/${seg}-${name}"
-   fi
+      #rm "${outdir}/${seg}-${name}"
+   fi 
+
+   rm "${outdir}/${seg}-${name}"
 done
 
 if [ ${#found_segments[@]} -eq 0 ]; then
