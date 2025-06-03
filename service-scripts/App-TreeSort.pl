@@ -110,10 +110,10 @@ sub process_treesort
 
    # Make sure the result folder name doesn't end with a period or slash.
    # TODO: Why would it end with a period?
-   if (substr $result_folder, -1 eq "." || substr $result_folder, -1 eq "/")
-   {
-      $result_folder = substr $result_folder, 0, -1;
-   }
+   #if (substr $result_folder, -1 eq "." || substr $result_folder, -1 eq "/")
+   #{
+   #   $result_folder = substr $result_folder, 0, -1;
+   #}
 
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
@@ -128,6 +128,7 @@ sub process_treesort
    # Make sure the staging directory exists.
    if (! -d $stage_dir) {
       die "Staging directory $stage_dir does not exist\n";
+      exit 1;
    }
 
    # If the result directory doesn't exist, create it.
@@ -141,6 +142,7 @@ sub process_treesort
       if (!$ok)
       {
          die "Error $? creating directory ws:$result_folder\n";
+         exit 1;
       }
    }
 
@@ -151,6 +153,8 @@ sub process_treesort
    if (!$ok)
    {
       warn "Error $? copying output with @cmd\n";
+      exit 1;
    }
    
+   exit 0;
 }
