@@ -121,22 +121,33 @@ sub process_treesort
 
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
-   # Copy the files from the staging directory to the workspace.
-   if (opendir(my $dh, $stage_dir))
-   {
-      # Use the p3 utility to copy the staged files to the user's workspace.
-      my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/", "ws:" . $result_folder);
+
+   # Make sure the staging directory exists.
+   if (! -d $stage_dir) {
+      die "Staging directory $stage_dir does not exist\n";
+   }
+
+   # If the result directory doesn't exist, create it.
+   if (! -d "ws:$result_folder") {
+
+      # Make sure the result folder (output path) exists.
+      my @cmd = ("p3-mkdir", "ws:$result_folder");
       print "@cmd\n";
+
       my $ok = IPC::Run::run(\@cmd);
       if (!$ok)
       {
-         warn "Error $? copying output with @cmd\n";
+         die "Error $? creating directory ws:$result_folder\n";
       }
-      
-      closedir($dh);
    }
-   else
+
+   # Use the p3 utility to copy the staged files to the user's workspace.
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/", "ws:$result_folder");
+   print "@cmd\n";
+   my $ok = IPC::Run::run(\@cmd);
+   if (!$ok)
    {
-      warn "Staging directory $stage_dir does not exist\n";
+      warn "Error $? copying output with @cmd\n";
    }
+   
 }
