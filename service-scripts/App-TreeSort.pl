@@ -89,10 +89,6 @@ sub process_treesort
    my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
    my $ok = run(\@cmd);
 
-   # TODO: This is for testing purposes and can be deleted.
-   print "Contents of the staging directory after running TreeSort:\n";
-   print `ls -l $stage_dir`."\n";
-
    # Was the command successful?
    if (!$ok)
    {
@@ -100,11 +96,15 @@ sub process_treesort
       exit 1;
    }
 
+   # TODO: This is for debugging purposes and can be deleted.
+   print "Contents of the staging directory after running TreeSort:\n";
+   print `ls -l $stage_dir`."\n";
+
    # A modifiable version of the workspace's result folder name.
    my $result_folder = $app->result_folder;
 
    # Make sure the result folder name doesn't end with "/.".
-   if ($result_folder =~ m{/\.$})
+   if ($result_folder =~ m{\/\.$})
    {
       $result_folder = substr $result_folder, 0, -2;
    }
@@ -141,6 +141,9 @@ sub process_treesort
          exit 1;
       }
    }
+
+   # TEST
+   print "stage_dir = $stage_dir, work_dir = $work_dir, and cwd = $cwd\n";
 
    # Use the p3 utility to copy the staged files to the user's workspace.
    my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/", "ws:$result_folder");
