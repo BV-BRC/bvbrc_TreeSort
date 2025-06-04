@@ -109,8 +109,6 @@ sub process_treesort
       $result_folder = substr $result_folder, 0, -2;
    }
 
-   print "Result folder is now $result_folder";
-
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
                      csv => 'csv',
@@ -142,11 +140,8 @@ sub process_treesort
       }
    }
 
-   # TEST
-   print "stage_dir = $stage_dir, work_dir = $work_dir, and cwd = $cwd\n";
-
    # Use the p3 utility to copy the staged files to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir/", "ws:$result_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir", "ws:$result_folder");
    print "@cmd\n";
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)
