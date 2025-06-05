@@ -1,5 +1,5 @@
 {
-   "clades_path": "",
+   "clades_path": "cladeInfo",
    "deviation": 2.0,
    "equal_rates": true,
    "inference_method": "local",

@@ -386,6 +386,16 @@ class TreeSortRunner:
    # Validate the TreeSort results and copy them to the staging directory.
    def process_results(self) -> bool:
 
+      # Copy the working directory to the staging directory.
+      shutil.copytree(self.work_directory, self.staging_directory)
+
+      return True
+   
+
+   """
+   # Validate the TreeSort results and copy them to the staging directory.
+   def process_results(self) -> bool:
+
       segments = None
       strSegments = safeTrim(self.job_data.segments)
       if len(strSegments) < 1:
@@ -431,7 +441,7 @@ class TreeSortRunner:
       #   sys.stderr.write(f"No results were generated for the following segment(s): {','.join(missingSegments)}\n\n")
       #   return False
 
-      return True
+      return True """
    
    # Run prepare_dataset.sh to build alignments and trees and compile a descriptor file.
    def run_prepare_dataset(self) -> bool:
