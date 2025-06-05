@@ -23,7 +23,8 @@ mountPoints+=",/vol/patric3/production/data-images/patric-data-2022-0119:/opt/pa
 mountPoints+=",/home/ac.ddempsey/dev/bvbrc_TreeSort_dmd:/project"
 
 # The Singularity container.
-container="/vol/patric3/production/containers/ubuntu-063-12.sif"
+container="/vol/patric3/production/containers/ubuntu-dev-090-12.sif"
+#"/vol/patric3/production/containers/ubuntu-063-12.sif"
 
 # Check if the container exists.
 if [ ! -f "$container" ]; then
