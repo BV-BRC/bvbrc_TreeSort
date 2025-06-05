@@ -3,18 +3,18 @@
 # This script initializes the environment for BV-BRC module development.
 
 # Source conda shell integration manually.
-if [ -f ~/miniconda3/etc/profile.d/conda.sh ]; then
-    source ~/miniconda3/etc/profile.d/conda.sh
-else
-    echo "Error: Conda shell integration script not found."
-    exit 1
-fi
+#if [ -f ~/miniconda3/etc/profile.d/conda.sh ]; then
+#    source ~/miniconda3/etc/profile.d/conda.sh
+#else
+#    echo "Error: Conda shell integration script not found."
+#    exit 1
+#fi
 
 # Activate the treesort conda environment.
-if ! conda activate treesort-env; then
-    echo "Error: Failed to activate Conda environment 'treesort-env'."
-    exit 1
-fi
+#if ! conda activate treesort-env; then
+#    echo "Error: Failed to activate Conda environment 'treesort-env'."
+#    exit 1
+#fi
 
 # Add all necessary mount points.
 mountPoints="/vol,/home,/homes,/disks/patric-common/"
