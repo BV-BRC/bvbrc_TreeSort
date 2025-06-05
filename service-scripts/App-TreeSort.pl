@@ -96,10 +96,6 @@ sub process_treesort
       exit 1;
    }
 
-   # TODO: This is for debugging purposes and can be deleted.
-   print "Contents of the staging directory after running TreeSort:\n";
-   print `ls -l $stage_dir`."\n";
-
    # A modifiable version of the workspace's result folder name.
    my $result_folder = $app->result_folder;
 
@@ -119,9 +115,9 @@ sub process_treesort
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
 
-   # Make sure the staging directory exists.
-   if (! -d $stage_dir) {
-      die "Staging directory $stage_dir does not exist\n";
+   # Make sure the work directory exists.
+   if (! -d $work_dir) {
+      die "Work directory $stage_dir does not exist\n";
       exit 1;
    }
 
@@ -140,8 +136,8 @@ sub process_treesort
       }
    }
 
-   # Use the p3 utility to copy the staged files to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$stage_dir", "ws:$result_folder");
+   # Use the p3 utility to copy the files in the work directory to the user's workspace.
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "ws:$result_folder");
    print "@cmd\n";
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)

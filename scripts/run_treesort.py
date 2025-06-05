@@ -6,7 +6,6 @@ from enum import Enum
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import traceback
@@ -468,9 +467,9 @@ class TreeSortRunner:
          if self.job_data.no_collapse:
             cmd.append(ScriptOption.NoCollapse.value)
 
-         # The name of the output file to create in the staging directory. 
+         # The name of the output file to create in the work directory. 
          cmd.append(ScriptOption.OutputFilename.value)
-         cmd.append(f"{self.staging_directory}/{self.job_data.output_filename}")
+         cmd.append(f"{self.work_directory}/{self.job_data.output_filename}")
          
          # Equal rates
          if self.job_data.equal_rates:
@@ -575,9 +574,6 @@ def main(argv=None) -> bool:
          traceback.print_exc(file=sys.stderr)
          sys.stderr.write("An error occurred in TreeSortRunner.run_prepare_dataset\n")
          sys.exit(-1)
-
-   # Copy the files in the working directory to the staging directory.
-   shutil.copytree(work_directory, staging_directory, dirs_exist_ok=True)
 
    # Run TreeSort
    if not runner.tree_sort():
