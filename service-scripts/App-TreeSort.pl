@@ -137,7 +137,7 @@ sub process_treesort
    }
 
    # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "ws:$result_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir/", "ws:$result_folder");
    print "@cmd\n";
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)
