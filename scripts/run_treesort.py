@@ -383,66 +383,6 @@ class TreeSortRunner:
       return True
 
 
-   # Validate the TreeSort results and copy them to the staging directory.
-   def process_results(self) -> bool:
-
-      # Copy the working directory to the staging directory.
-      shutil.copytree(self.work_directory, self.staging_directory)
-
-      return True
-   
-
-   """
-   # Validate the TreeSort results and copy them to the staging directory.
-   def process_results(self) -> bool:
-
-      segments = None
-      strSegments = safeTrim(self.job_data.segments)
-      if len(strSegments) < 1:
-         # Since no segments were proviced, use all segments.
-         segments = VALID_SEGMENTS
-      else:
-         # Split the segment subset into a list.
-         segments = strSegments.split(",")
-
-      missingSegments = []
-
-      # Iterate over the segments.
-      for segment in segments:
-
-         segment = safeTrim(segment)
-         if len(segment) < 1:
-            continue
-
-         # The full path of the segment's result directory.
-         directory = f"{self.work_directory}/{segment}{RESULT_DIRECTORY_SUFFIX}"
-
-         # Does this directory exist?
-         if not os.path.isdir(directory):
-            missingSegments.append(segment)
-            continue
-
-         filesExist = True
-
-         # Make sure result files exist for all segments in the analysis.
-         for filename in RESULT_FILENAMES:
-            if not os.path.exists(f"{directory}/{filename}"):
-               filesExist = False
-
-         if not filesExist:
-            missingSegments.append(segment)
-            continue
-
-         # Copy the entire directory to the staging directory.
-         shutil.copytree(directory, f"{self.staging_directory}/{segment}{RESULT_DIRECTORY_SUFFIX}")
-      
-      # Were there any segments without results?
-      #if len(missingSegments) > 0:
-      #   sys.stderr.write(f"No results were generated for the following segment(s): {','.join(missingSegments)}\n\n")
-      #   return False
-
-      return True """
-   
    # Run prepare_dataset.sh to build alignments and trees and compile a descriptor file.
    def run_prepare_dataset(self) -> bool:
 
@@ -636,14 +576,16 @@ def main(argv=None) -> bool:
          sys.stderr.write("An error occurred in TreeSortRunner.run_prepare_dataset\n")
          sys.exit(-1)
 
+   # Copy the files in the working directory to the staging directory.
+   shutil.copytree(work_directory, staging_directory, dirs_exist_ok=True)
+
    # Run TreeSort
    if not runner.tree_sort():
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("An error occurred in TreeSortRunner.tree_sort\n")
       sys.exit(-1)
 
-   # Validate the TreeSort results and copy them to the staging directory.
-   return runner.process_results()
+   return True
 
 
 if __name__ == "__main__" :
