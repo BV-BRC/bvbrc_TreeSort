@@ -49,9 +49,8 @@ sub process_treesort
    my $token = $app->token();
    my $ws = $app->workspace();
 
-   # Create a temp directory for intermediate calculations/results.
-   # DMD TEST: Don't clean up the temp directory when we're testing.
-   my $cwd = File::Temp->newdir(CLEANUP => 0); # CLEANUP => 1 );
+   # Create a temp directory for intermediate and result files.
+   my $cwd = File::Temp->newdir(CLEANUP => 1);
 
    # Create an "input" subdirectory for the input FASTA file, etc.
    my $input_dir = "$cwd/input";
@@ -97,6 +96,9 @@ sub process_treesort
       $result_folder = substr $result_folder, 0, -2;
    }
 
+   # Make sure the result folder starts with "ws:".
+   $result_folder = "ws:$result_folder" unless $result_folder =~ /^ws:/;
+
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
                      csv => 'csv',
@@ -106,30 +108,23 @@ sub process_treesort
 
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
-
-   # Make sure the work directory exists.
-   if (! -d $work_dir) {
-      die "Work directory $work_dir does not exist\n";
-      exit 1;
-   }
-
    # If the result directory doesn't exist, create it.
-   if (! -d "ws:$result_folder") {
+   if (! -d $result_folder) {
 
       # Make sure the result folder (output path) exists.
-      my @cmd = ("p3-mkdir", "ws:$result_folder");
+      my @cmd = ("p3-mkdir", $result_folder);
       print "@cmd\n";
 
       my $ok = IPC::Run::run(\@cmd);
       if (!$ok)
       {
-         die "Error $? creating directory ws:$result_folder\n";
+         die "Error $? creating directory $result_folder\n";
          exit 1;
       }
    }
 
    # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "ws:$result_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "$result_folder");
    print "@cmd\n";
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)
