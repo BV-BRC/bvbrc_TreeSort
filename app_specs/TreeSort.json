@@ -1,0 +1,180 @@
+{
+   "id": "TreeSort",
+   "script": "App-TreeSort",
+   "label": "Virus reassortment inference software.",
+   "description": "TreeSort infers both recent and ancestral reassortment events along the branches of a phylogenetic tree of a fixed genomic segment.",
+   "default_memory": "100G",
+   "parameters": [
+      {
+         "id": "clades_path",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Clades path",
+         "desc": "Path to an output file, where clades with evidence of reassortment will be saved",
+         "type": "string"
+      },
+      {
+         "id": "deviation",
+         "allow_multiple": false,
+         "required": 0,
+         "default": 2.0,
+         "label": "Deviation",
+         "desc": "Maximum deviation from the estimated substitution rate within each segment. The substitution rate on a particular tree branch is allowed to be twice as high or twice as low as the estimated rate.",
+         "type": "float"
+      },
+      {
+         "id": "equal_rates",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Equal rates",
+         "desc": "Do not estimate molecular clock rates for different segments: assume equal rates. Ignored if timetree is specified",
+         "type": "boolean"
+      },
+      {
+         "id": "inference_method",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "local",
+         "label": "Reassortment inference method",
+         "desc": "Methods are \"local\" (default) or \"mincut\". The \"mincut\" method always determines the most parsimonious reassortment placement even in ambiguous circumstances",
+         "enum": ["local", "mincut"],
+         "type": "enum"
+      },
+      {
+         "id": "input_fasta_existing_dataset",
+         "label": "Existing dataset",
+         "required": 0,
+         "default": null,
+         "desc": "A directory with previously generated files",
+         "type": "string"
+      },
+      {
+         "id": "input_fasta_data",
+         "label": "Input FASTA",
+         "required": 0,
+         "default": null,
+         "desc": "The input FASTA sequence",
+         "type": "string"
+      },
+      {
+         "id": "input_fasta_file_id",
+         "label": "Input FASTA file ID",
+         "required": 0,
+         "default": null,
+         "desc": "The ID of a FASTA input sequence file in the workspace",
+         "type": "wsid"
+      },
+      {
+         "id": "input_fasta_group_id",
+         "label": "Input genome group ID",
+         "required": 0,
+         "default": null,
+         "desc": "The ID of a genome (feature?) group in the workspace",
+         "type": "wsid"
+      },
+      {
+         "id": "input_source",
+         "allow_multiple": false,
+         "required": 1,
+         "default": "fasta_file_id",
+         "label": "Input source",
+         "desc": "Is the input a FASTA sequence, the ID of a FASTA file in the workspace, a directory with previously prepared files, or a genome group from the workspace?",
+         "enum": ["fasta_data", "fasta_existing_dataset", "fasta_file_id", "fasta_group_id"],
+         "type": "enum"
+      },
+      {
+         "id": "is_time_scaled",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Is time scaled?",
+         "desc": "Indicates that the reference tree is time-scaled (e.g., through TreeTime)",
+         "type": "boolean"
+      },
+      {
+         "id": "match_regex",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Regular Expression for matching",
+         "desc": "Provide your own custom regex to match the segments across the alignments.",
+         "type": "string"
+      },
+      {
+         "id": "match_type",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "default",
+         "label": "Segment match type",
+         "desc": "How should the segments be matched across the alignments?",
+         "enum": [ "default", "epi", "regex", "strain"],
+         "type": "enum"
+      },
+      {
+         "id": "no_collapse",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "No collapse",
+         "desc": "Do not collapse near-zero length branches into multifurcations (by default, TreeSort collapses all branches shorter than 1e-7 and then optimizes the multifurcations).",
+         "type": "boolean"
+      },
+      {
+         "id": "output_filename",
+         "allow_multiple": false,
+         "required": 1,
+         "default": null,
+         "label": "Output path",
+         "desc": "The name of the output file (a tree file in nexus format)",
+         "type": "string"
+      },
+      {
+         "id": "output_path",
+         "allow_multiple": false,
+         "required": 1,
+         "default": null,
+         "label": "Output path",
+         "desc": "Path to the output file",
+         "type": "string"
+      }, 
+      {
+         "id": "p_value",
+         "allow_multiple": false,
+         "required": 0,
+         "default": 0.001,
+         "label": "P-value",
+         "desc": "The cutoff p-value for the reassortment tests: the default is 0.001 (0.1 percent). You may want to decrease or increase this parameter depending on how stringent you want the analysis to be.",
+         "type": "float"
+      },
+      {
+         "id": "ref_segment",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "HA",
+         "label": "Reference Segment",
+         "desc": "The reference segment",
+         "type": "string"
+      },
+      {
+         "id": "ref_tree_inference",
+         "allow_multiple": false,
+         "required": 0,
+         "default": "IQTree",
+         "label": "Reference tree inference method",
+         "desc": "Should the reference phylogeny be built using FastTree (fast, low quality) or IQ-Tree (slower, high quality)?",
+         "type": "enum",
+         "enum": ["FastTree", "IQTree"]
+      },
+      {
+         "id": "segments",
+         "allow_multiple": false,
+         "required": 0,
+         "default": null,
+         "label": "Segments",
+         "desc": "The segments to be analyzed. If you want to analyze all segments, leave this field empty.",
+         "type": "string"
+      }
+   ]
+}
