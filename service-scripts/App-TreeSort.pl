@@ -57,10 +57,6 @@ sub process_treesort
    my $input_dir = "$cwd/input";
    -d $input_dir or mkdir $input_dir or die "Cannot mkdir $input_dir: $!";
 
-   # Create a "staging" subdirectory for output files that will be copied to the workspace.
-   my $stage_dir = "$cwd/stage";
-   -d $stage_dir or mkdir $stage_dir or die "Cannot mkdir $stage_dir: $!";
-
    # Create a "working" subdirectory for the input and intermediate file(s).
    my $work_dir = "$cwd/work";
    -d $work_dir or mkdir $work_dir or die "Cannot mkdir $work_dir: $!";
@@ -82,7 +78,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-s", $stage_dir, "-w", $work_dir);
+   my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-w", $work_dir);
    my $ok = run(\@cmd);
 
    # Was the command successful?
@@ -113,7 +109,7 @@ sub process_treesort
 
    # Make sure the work directory exists.
    if (! -d $work_dir) {
-      die "Work directory $stage_dir does not exist\n";
+      die "Work directory $work_dir does not exist\n";
       exit 1;
    }
 
@@ -133,7 +129,7 @@ sub process_treesort
    }
 
    # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir/", "ws:$result_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "ws:$result_folder");
    print "@cmd\n";
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)
