@@ -160,26 +160,18 @@ class TreeSortRunner:
 
    # The JSON data for the job.
    job_data: JobData
-   
-   # The directory where the output files will be created.
-   staging_directory: str
 
    # The directory where the scripts will be run.
    work_directory: str
 
 
    # C-tor
-   def __init__(self, input_directory: str, job_data: JobData, staging_directory: str, work_directory: str):
+   def __init__(self, input_directory: str, job_data: JobData, work_directory: str):
          
       # The input directory
       self.input_directory = input_directory
       if not self.input_directory or len(self.input_directory) < 1:
          raise ValueError("The input directory parameter is invalid")
-      
-      # The staging directory
-      self.staging_directory = staging_directory
-      if not self.staging_directory or len(self.staging_directory) < 1:
-         raise ValueError("The staging directory parameter is invalid")
       
       # The work directory
       self.work_directory = work_directory
@@ -395,7 +387,7 @@ class TreeSortRunner:
          cmd = ["prepare_treesort_dataset.sh"]
 
          # Should --fast be added?
-         # TODO: Support FastTree, IQ-Tree, and RAxML
+         # TODO: Consider supporting RAxML in addition to FastTree and IQ-Tree. 
          if (self.job_data.ref_tree_inference and self.job_data.ref_tree_inference == TreeInference.FastTree.value):
             cmd.append(ScriptOption.FastTree.value)
 
@@ -505,7 +497,6 @@ def main(argv=None) -> bool:
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
    parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory with FASTA input file(s)", required=True)
    parser.add_argument("-j", "--job-filename", dest="job_filename", help="The job description JSON file", required=True)
-   parser.add_argument("-s", "--staging-directory", dest="staging_directory", help="The directory where output files will be copied", required=True)
    parser.add_argument("-w", "--work-directory", dest="work_directory", help="The directory where intermediate files are generated", required=True)
    
    args = parser.parse_args()
@@ -522,13 +513,6 @@ def main(argv=None) -> bool:
    if len(job_filename) == 0:
       traceback.print_exc(file=sys.stderr)
       sys.stderr.write("Invalid job filename parameter\n")
-      sys.exit(-1)
-
-   # The staging directory parameter.
-   staging_directory = safeTrim(args.staging_directory)
-   if len(staging_directory) == 0:
-      traceback.print_exc(file=sys.stderr)
-      sys.stderr.write("Invalid staging directory parameter\n")
       sys.exit(-1)
 
    # The work directory parameter.
@@ -553,7 +537,7 @@ def main(argv=None) -> bool:
 
    try:
       # Create a TreeSortRunner instance
-      runner = TreeSortRunner(input_directory, job_data, staging_directory, work_directory)
+      runner = TreeSortRunner(input_directory, job_data, work_directory)
 
    except Exception as e:
       traceback.print_exc(file=sys.stderr)
