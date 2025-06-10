@@ -3,7 +3,8 @@
 # This will be called by the singularity container.
 
 # Update the path
-export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort:/home/ac.ddempsey/miniconda3/envs/treesort-env/bin
+export PATH=$PATH:/project:/project/scripts:/project/external/TreeSort
+# /home/ac.ddempsey/miniconda3/envs/treesort-env/bin
 
 # TEST
 cd /project/external/TreeSort
