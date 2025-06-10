@@ -49,10 +49,6 @@ sub process_treesort
    my $token = $app->token();
    my $ws = $app->workspace();
 
-   # Uncomment to print user info.
-   #my @cmd = ("p3-whoami");
-   #IPC::Run::run(\@cmd);
-
    # Create a temp directory for intermediate calculations/results.
    # DMD TEST: Don't clean up the temp directory when we're testing.
    my $cwd = File::Temp->newdir(CLEANUP => 0); # CLEANUP => 1 );

@@ -94,7 +94,7 @@ aln_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln" | wc -l)
 empty_aln_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln" -empty | wc -l)
 
 # Were alignment files generated?
-if [ $aln_count - $empty_aln_count < 1 ]; then
+if [ $((aln_count - empty_aln_count)) -lt 1 ]; then
    echo -e "No alignment files were generated.\n"
    exit 1
 fi
@@ -130,7 +130,7 @@ tre_count=$(find ${outdir} -maxdepth 1 -type f -path "*.tre" | wc -l)
 empty_tre_count=$(find ${outdir} -maxdepth 1 -type f -path "*.tre" -empty | wc -l)
 
 # Were tree files generated?
-if [ $tre_count - $empty_tre_count < 1 ]; then
+if [ $((tre_count - empty_tre_count)) -lt 1 ]; then
    echo -e "No tree files were generated.\n"
    exit 1
 fi
@@ -148,7 +148,7 @@ rooted_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln.rooted.tre" | wc 
 empty_rooted_count=$(find ${outdir} -maxdepth 1 -type f -path "*.aln.rooted.tre" -empty | wc -l)
 
 # Were tree files generated?
-if [ $rooted_count - $empty_rooted_count < 1 ]; then
+if [ $((rooted_count - empty_rooted_count)) -lt 1 ]; then
    echo -e "No rooted tree files were generated.\n"
    exit 1
 fi
