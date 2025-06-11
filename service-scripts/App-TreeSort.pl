@@ -78,8 +78,8 @@ sub process_treesort
 
    # TEST
    my @test = ("python", "--version");
-   run(\@test)
-   
+   run(\@test);
+
    # Run the Python script that runs TreeSort.
    my @cmd = ("run_treesort", "-i", $input_dir, "-j", $job_desc, "-w", $work_dir);
    my $ok = run(\@cmd);
