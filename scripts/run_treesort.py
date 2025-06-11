@@ -107,7 +107,7 @@ class TreeInference(str, Enum):
 #-----------------------------------------------------------------------------------------------------------------------------
 
 # Trim a string that's possibly null and always return a trimmed, non-null value.
-def safeTrim(text: str|None):
+def safeTrim(text: Optional[str]):
    if not text:
       return ""
    else:
