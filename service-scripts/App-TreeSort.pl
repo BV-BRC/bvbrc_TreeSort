@@ -76,10 +76,6 @@ sub process_treesort
 
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
-   # TEST
-   my @test = ("python", "--version");
-   run(\@test);
-
    # Run the Python script that runs TreeSort.
    my @cmd = ("run_treesort", "-i", $input_dir, "-j", $job_desc, "-w", $work_dir);
    my $ok = run(\@cmd);
