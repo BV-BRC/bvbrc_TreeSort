@@ -78,4 +78,8 @@ $(BIN_DIR)/%: service-scripts/%.pl $(TOP_DIR)/user-env.sh
 $(BIN_DIR)/%: service-scripts/%.py $(TOP_DIR)/user-env.sh
 	$(WRAP_PYTHON_SCRIPT) '$$KB_TOP/modules/$(CURRENT_DIR)/$<' $@
 
+# dmd testing 061125
+$(BIN_DIR)/%: scripts/%.py $(TOP_DIR)/user-env.sh
+	$(WRAP_PYTHON_SCRIPT) '$$KB_TOP/modules/$(CURRENT_DIR)/$<' $@
+
 include $(TOP_DIR)/tools/Makefile.common.rules
