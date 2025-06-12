@@ -492,8 +492,9 @@ def main(argv=None) -> bool:
    if argv is None:
       argv = sys.argv[1:]  
 
-   # Set MPLBACKEND for all subprocesses
+   # Override matplotlib's defaults for all subprocesses
    os.environ["MPLBACKEND"] = "Agg"
+   os.environ["QT_QPA_PLATFORM"] = "minimal"
    
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
