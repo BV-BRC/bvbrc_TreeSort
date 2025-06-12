@@ -383,7 +383,7 @@ class TreeSortRunner:
       result_status = False
 
       try:
-         cmd = ["prepare_treesort_dataset.sh"]
+         cmd = ["prepare_treesort_dataset"]
 
          # Specify the reference tree inference method.
          # TODO: Consider supporting RAxML in addition to FastTree and IQ-Tree. 
