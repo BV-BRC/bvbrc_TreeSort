@@ -493,7 +493,7 @@ def main(argv=None) -> bool:
       argv = sys.argv[1:]  
 
    # Set MPLBACKEND for all subprocesses
-   os.environ["MPLBACKEND"] = "pdf"
+   os.environ["MPLBACKEND"] = "agg"
    
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
