@@ -494,7 +494,8 @@ def main(argv=None) -> bool:
 
    # Override matplotlib's defaults for all subprocesses
    os.environ["MPLBACKEND"] = "Agg"
-   os.environ["QT_QPA_PLATFORM"] = "minimal"
+   os.environ["QT_QPA_PLATFORM"] = "offscreen" # "minimal"
+   # TODO: Try os.environ["DISPLAY"] = ""
    
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
