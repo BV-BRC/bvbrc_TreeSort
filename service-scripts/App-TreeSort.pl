@@ -99,8 +99,8 @@ sub process_treesort
    # Append "/."
    $output_folder .= "/.";
 
-   # Make sure the result folder starts with "ws:".
-   $result_folder = "ws:$result_folder" unless $result_folder =~ /^ws:/;
+   # Make sure the output folder starts with "ws:".
+   $output_folder = "ws:$output_folder" unless $output_folder =~ /^ws:/;
 
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
