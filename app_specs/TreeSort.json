@@ -126,17 +126,17 @@
          "allow_multiple": false,
          "required": 1,
          "default": null,
-         "label": "Output path",
+         "label": "Output filename",
          "desc": "The name of the output file (a tree file in nexus format)",
          "type": "string"
       },
       {
-         "id": "output_path",
+         "id": "output_folder",
          "allow_multiple": false,
          "required": 1,
          "default": null,
-         "label": "Output path",
-         "desc": "Path to the output file",
+         "label": "Output folder",
+         "desc": "The parent directory of the output files",
          "type": "string"
       }, 
       {

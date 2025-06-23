@@ -135,7 +135,7 @@ class JobData:
    match_type: Optional[MatchType]
    no_collapse: bool
    output_filename: str
-   output_path: str
+   output_folder: str
    p_value: float
    ref_segment: str
    ref_tree_inference: TreeInference
@@ -269,9 +269,9 @@ class TreeSortRunner:
          if self.job_data.match_type == MatchType.RegEx and len(match_regex) < 1:
             raise ValueError("The match regular expression was not provided")
 
-         # Validate the output path.
-         if not self.job_data.output_path:
-            raise ValueError("The output path is invalid")
+         # Validate the output folder.
+         if not self.job_data.output_folder:
+            raise ValueError("The output folder is invalid")
 
          # Validate the output filename
          if not self.job_data.output_filename:

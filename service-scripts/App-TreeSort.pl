@@ -87,14 +87,17 @@ sub process_treesort
       exit 1;
    }
 
-   # A modifiable version of the workspace's result folder name.
-   my $result_folder = $app->result_folder;
+   # The workspace folder where the output files will be moved.
+   my $output_folder = $params_to_app->{output_folder};
+   if (!defined($output_folder) || $output_folder eq '') {
+      die "output_folder is not defined or is empty";
+   }
 
-   # Make sure the result folder name doesn't end with "/.".
-   #if ($result_folder =~ m{\/\.$})
-   #{
-   #   $result_folder = substr $result_folder, 0, -2;
-   #}
+   # Remove any trailing slashes or dots
+   $output_folder =~ s{[/.]+$}{};
+
+   # Append "/."
+   $output_folder .= "/.";
 
    # Make sure the result folder starts with "ws:".
    $result_folder = "ws:$result_folder" unless $result_folder =~ /^ws:/;
@@ -109,8 +112,9 @@ sub process_treesort
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
    # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "$result_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "$output_folder");
    print "@cmd\n";
+   
    my $ok = IPC::Run::run(\@cmd);
    if (!$ok)
    {

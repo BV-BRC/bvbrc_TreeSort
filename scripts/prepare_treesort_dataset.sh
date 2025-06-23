@@ -77,8 +77,6 @@ do
          echo "MAFFT alignment failed"
          exit 1
       fi
-
-      #rm "${outdir}/${seg}-${name}"
    fi 
 
    rm "${outdir}/${seg}-${name}"
