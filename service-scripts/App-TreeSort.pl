@@ -44,7 +44,7 @@ sub process_treesort
    my($app, $app_def, $raw_params, $params) = @_;
 
    # Uncomment to troubleshoot the parameters.
-   # warn Dumper($app_def, $raw_params, $params);
+   warn Dumper($app_def, $raw_params, $params);
 
    my $token = $app->token();
    my $ws = $app->workspace();
@@ -95,6 +95,9 @@ sub process_treesort
 
    # Remove any trailing slashes or dots
    $output_folder =~ s{[/.]+$}{};
+   if ($output_folder eq '') {
+      die "output_folder is empty after removing trailing slashes/dots";
+   }
 
    # Append "/."
    $output_folder .= "/.";

@@ -492,11 +492,6 @@ def main(argv=None) -> bool:
    if argv is None:
       argv = sys.argv[1:]  
 
-   # Override matplotlib's defaults for all subprocesses
-   """os.environ["MPLBACKEND"] = "Agg"
-   os.environ["QT_QPA_PLATFORM"] = "minimal"
-   os.environ["DISPLAY"] = "" """
-
    # Create an argument parser.
    parser = argparse.ArgumentParser(description="A script to run TreeSort")
    parser.add_argument("-i", "--input-directory", dest="input_directory", help="The directory with FASTA input file(s)", required=True)
