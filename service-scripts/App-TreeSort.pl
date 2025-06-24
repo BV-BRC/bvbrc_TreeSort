@@ -44,7 +44,7 @@ sub process_treesort
    my($app, $app_def, $raw_params, $params) = @_;
 
    # Uncomment to troubleshoot the parameters.
-   # warn Dumper($app_def, $raw_params, $params);
+   warn Dumper($app_def, $raw_params, $params);
 
    my $token = $app->token();
    my $ws = $app->workspace();
@@ -77,7 +77,7 @@ sub process_treesort
    my $parallel = $ENV{P3_ALLOCATED_CPU};
 
    # Run the Python script that runs TreeSort.
-   my @cmd = ("run_treesort.py", "-i", $input_dir, "-j", $job_desc, "-w", $work_dir);
+   my @cmd = ("run_treesort", "-i", $input_dir, "-j", $job_desc, "-w", $work_dir);
    my $ok = run(\@cmd);
 
    # Was the command successful?
@@ -86,18 +86,6 @@ sub process_treesort
       die "Command failed: @cmd\n";
       exit 1;
    }
-
-   # A modifiable version of the workspace's result folder name.
-   my $result_folder = $app->result_folder;
-
-   # Make sure the result folder name doesn't end with "/.".
-   if ($result_folder =~ m{\/\.$})
-   {
-      $result_folder = substr $result_folder, 0, -2;
-   }
-
-   # Make sure the result folder starts with "ws:".
-   $result_folder = "ws:$result_folder" unless $result_folder =~ /^ws:/;
 
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
@@ -108,30 +96,28 @@ sub process_treesort
 
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
-   # If the result directory doesn't exist, create it.
-   if (! -d $result_folder) {
-
-      # Make sure the result folder (output path) exists.
-      my @cmd = ("p3-mkdir", $result_folder);
-      print "@cmd\n";
-
-      my $ok = IPC::Run::run(\@cmd);
-      if (!$ok)
-      {
-         die "Error $? creating directory $result_folder\n";
-         exit 1;
-      }
-   }
-
-   # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "$result_folder");
-   print "@cmd\n";
-   my $ok = IPC::Run::run(\@cmd);
-   if (!$ok)
+   if (opendir(my $dh, $work_dir))
    {
-      warn "Error $? copying output with @cmd\n";
-      exit 1;
+      while (my $p = readdir($dh))
+      {
+         next if $p =~ /^\./;
+
+         # Use the p3 utility to copy the files in the work directory to the user's workspace.
+         my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir/$p", "ws:" . $app->result_folder);
+         print "@cmd\n";
+
+         my $ok = IPC::Run::run(\@cmd);
+         if (!$ok)
+         {
+            warn "Error $? copying output with @cmd\n";
+         }
+      } 
+      closedir($dh);
    }
-   
+   else
+   {
+      warn "Output directory $work_dir does not exist\n";
+   }
+
    exit 0;
 }

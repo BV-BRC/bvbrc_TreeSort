@@ -77,8 +77,6 @@ do
          echo "MAFFT alignment failed"
          exit 1
       fi
-
-      #rm "${outdir}/${seg}-${name}"
    fi 
 
    rm "${outdir}/${seg}-${name}"
@@ -139,7 +137,7 @@ fi
 echo -e "Rooting trees with TreeTime...\n"
 for seg in "${found_segments[@]}"
 do
-	treetime-root.py "${outdir}/${seg}-${name}.tre" "${outdir}/${seg}-${name}.aln" &
+	treetime-root "${outdir}/${seg}-${name}.tre" "${outdir}/${seg}-${name}.aln" &
 done
 wait
 
