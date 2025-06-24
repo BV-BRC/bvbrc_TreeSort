@@ -96,16 +96,28 @@ sub process_treesort
 
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
-   # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir/", "ws:".$app->result_folder);
-   print "@cmd\n";
-   
-   my $ok = IPC::Run::run(\@cmd);
-   if (!$ok)
+   if (opendir(my $dh, $work_dir))
    {
-      warn "Error $? copying output with @cmd\n";
-      exit 1;
+      while (my $p = readdir($dh))
+      {
+         next if $p =~ /^\./;
+
+         # Use the p3 utility to copy the files in the work directory to the user's workspace.
+         my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir/$p", "ws:" . $app->result_folder);
+         print "@cmd\n";
+
+         my $ok = IPC::Run::run(\@cmd);
+         if (!$ok)
+         {
+            warn "Error $? copying output with @cmd\n";
+         }
+      } 
+      closedir($dh);
    }
-   
+   else
+   {
+      warn "Output directory $work_dir does not exist\n";
+   }
+
    exit 0;
 }
