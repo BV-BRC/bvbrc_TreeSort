@@ -6,6 +6,8 @@ TARGET ?= /kb/deployment
 
 APP_SERVICE = app_service
 
+WRAP_PYTHON_TOOL = wrap_python3
+
 SRC_PERL = $(wildcard scripts/*.pl)
 BIN_PERL = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_PERL))))
 DEPLOY_PERL = $(addprefix $(TARGET)/bin/,$(basename $(notdir $(SRC_PERL))))
@@ -13,6 +15,14 @@ DEPLOY_PERL = $(addprefix $(TARGET)/bin/,$(basename $(notdir $(SRC_PERL))))
 SRC_SERVICE_PERL = $(wildcard service-scripts/*.pl)
 BIN_SERVICE_PERL = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_SERVICE_PERL))))
 DEPLOY_SERVICE_PERL = $(addprefix $(SERVICE_DIR)/bin/,$(basename $(notdir $(SRC_SERVICE_PERL))))
+
+SRC_PYTHON = $(wildcard scripts/*.py)
+BIN_PYTHON = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_PYTHON))))
+DEPLOY_PYTHON = $(addprefix $(TARGET)/bin/,$(basename $(notdir $(SRC_PYTHON))))
+
+SRC_SH = $(wildcard scripts/*.sh)
+BIN_SH = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_SH))))
+DEPLOY_SH = $(addprefix $(TARGET)/bin/,$(basename $(notdir $(SRC_SH))))
 
 CLIENT_TESTS = $(wildcard t/client-tests/*.t)
 SERVER_TESTS = $(wildcard t/server-tests/*.t)
@@ -29,7 +39,7 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
 
 all: bin 
 
-bin: $(BIN_PERL) $(BIN_SERVICE_PERL)
+bin: $(BIN_PERL) $(BIN_SERVICE_PERL) $(BIN_PYTHON) $(BIN_SH)
 
 deploy: deploy-all
 deploy-all: deploy-client 
