@@ -138,7 +138,16 @@
          "label": "Output folder",
          "desc": "The parent directory of the output files",
          "type": "string"
-      }, 
+      },
+      {
+         "id": "output_path",
+         "allow_multiple": false,
+         "required": 1,
+         "default": null,
+         "label": "Output path",
+         "desc": "The name of the directory that will be created in the output folder",
+         "type": "string"
+      },
       {
          "id": "p_value",
          "allow_multiple": false,

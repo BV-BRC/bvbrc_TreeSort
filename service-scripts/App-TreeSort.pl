@@ -43,6 +43,8 @@ sub process_treesort
    # Declare and assign local variables for the parameters passed to the process_treesort function.
    my($app, $app_def, $raw_params, $params) = @_;
 
+   print "In process_treesort\n";
+   
    # Uncomment to troubleshoot the parameters.
    warn Dumper($app_def, $raw_params, $params);
 
