@@ -122,31 +122,20 @@
          "type": "boolean"
       },
       {
-         "id": "output_filename",
-         "allow_multiple": false,
+         "id": "output_file",
+         "label": "File Basename",
          "required": 1,
          "default": null,
-         "label": "Output filename",
-         "desc": "The name of the output file (a tree file in nexus format)",
-         "type": "string"
-      },
-      {
-         "id": "output_folder",
-         "allow_multiple": false,
-         "required": 1,
-         "default": null,
-         "label": "Output folder",
-         "desc": "The parent directory of the output files",
-         "type": "string"
+         "desc": "Basename for the generated output files. Defaults to the basename of the input data.",
+         "type": "wsid"
       },
       {
          "id": "output_path",
-         "allow_multiple": false,
+         "label": "Output Folder",
          "required": 1,
          "default": null,
-         "label": "Output path",
-         "desc": "The name of the directory that will be created in the output folder",
-         "type": "string"
+         "desc": "Path to which the output will be written. Defaults to the directory containing the input data. ",
+         "type": "folder"
       },
       {
          "id": "p_value",

@@ -134,8 +134,8 @@ class JobData:
    match_regex: Optional[str]
    match_type: Optional[MatchType]
    no_collapse: bool
-   output_filename: str
-   output_folder: str
+   output_file: str
+   output_path: str
    p_value: float
    ref_segment: str
    ref_tree_inference: TreeInference
@@ -269,18 +269,18 @@ class TreeSortRunner:
          if self.job_data.match_type == MatchType.RegEx and len(match_regex) < 1:
             raise ValueError("The match regular expression was not provided")
 
-         # Validate the output folder.
-         if not self.job_data.output_folder:
-            raise ValueError("The output folder is invalid")
+         # Validate the output path.
+         if not self.job_data.output_path:
+            raise ValueError("The output path is invalid")
 
          # Validate the output filename
-         if not self.job_data.output_filename:
+         if not self.job_data.output_file:
             raise ValueError("The output filename is invalid")
          
          # Add a .tree extension to the output filename if it doesn't already have an extension.
          fileExtRegex = r'\.[a-zA-Z]{1,3}$'
-         if not re.search(fileExtRegex, self.job_data.output_filename):
-            self.job_data.output_filename += TREE_FILE_EXTENSION
+         if not re.search(fileExtRegex, self.job_data.output_file):
+            self.job_data.output_file += TREE_FILE_EXTENSION
 
          # Validate the reference segment and provide a default if not provided.
          refSegment = safeTrim(self.job_data.ref_segment)
@@ -460,7 +460,7 @@ class TreeSortRunner:
 
          # The name of the output file to create in the work directory. 
          cmd.append(ScriptOption.OutputFilename.value)
-         cmd.append(f"{self.work_directory}/{self.job_data.output_filename}")
+         cmd.append(f"{self.work_directory}/{self.job_data.output_file}")
          
          # Equal rates
          if self.job_data.equal_rates:

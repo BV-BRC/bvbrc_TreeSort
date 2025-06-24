@@ -43,8 +43,6 @@ sub process_treesort
    # Declare and assign local variables for the parameters passed to the process_treesort function.
    my($app, $app_def, $raw_params, $params) = @_;
 
-   print "In process_treesort\n";
-   
    # Uncomment to troubleshoot the parameters.
    warn Dumper($app_def, $raw_params, $params);
 
@@ -89,24 +87,6 @@ sub process_treesort
       exit 1;
    }
 
-   # The workspace folder where the output files will be moved.
-   my $output_folder = $params_to_app->{output_folder};
-   if (!defined($output_folder) || $output_folder eq '') {
-      die "output_folder is not defined or is empty";
-   }
-
-   # Remove any trailing slashes or dots
-   $output_folder =~ s{[/.]+$}{};
-   if ($output_folder eq '') {
-      die "output_folder is empty after removing trailing slashes/dots";
-   }
-
-   # Append "/."
-   $output_folder .= "/.";
-
-   # Make sure the output folder starts with "ws:".
-   $output_folder = "ws:$output_folder" unless $output_folder =~ /^ws:/;
-
    # Map file extensions to BV-BRC file types.
    my %suffix_map = (aln => 'aligned_dna_fasta',
                      csv => 'csv',
@@ -117,7 +97,7 @@ sub process_treesort
    my @suffix_map = map { ("--map-suffix", "$_=$suffix_map{$_}") } keys %suffix_map;
 
    # Use the p3 utility to copy the files in the work directory to the user's workspace.
-   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", "$output_folder");
+   my @cmd = ("p3-cp", "-r", "-f", @suffix_map, "$work_dir", $app->result_folder);
    print "@cmd\n";
    
    my $ok = IPC::Run::run(\@cmd);
