@@ -118,6 +118,4 @@ sub process_treesort
    {
       warn "Output directory $work_dir does not exist\n";
    }
-
-   exit 0;
 }
