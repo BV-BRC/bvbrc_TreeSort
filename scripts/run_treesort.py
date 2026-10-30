@@ -889,8 +889,6 @@ class TreeSortRunner:
          # Example JSON: [{"collection_date":"2011-03-21","strain":"D/swine/Oklahoma/1334/2011","segment":["1","2","3","4","5","6","7"],"genome_id":"1173138.25"}]
          data = r.json()
 
-         #sys.stdout.write(f"\nGenome JSON:\n\n{data}\n\n")
-
          valid_genomes = 0
 
          # Iterate over all genome metadata in the JSON.
@@ -917,37 +915,7 @@ class TreeSortRunner:
             except Exception as e:
                sys.stderr.write(str(e))
                continue
-            
-            """
-            # dmd 09/16/26 Segment is a list of segment numbers.
-            segment_numbers = rec.get("segment")
-            if isinstance(segment_numbers, str):
-               # This will probably never be reached, but just in case...
-               segment_numbers = [segment_numbers]
-
-            # The segment numbers will be converted to names and added to this comma-delimited string.
-            segment_names = ""
-            
-            for segment_number in segment_numbers:
-               segment_number = safe_trim(segment_number)
-               if len(segment_number) < 1:
-                  continue
-
-               # Convert numeric segment to canonical name
-               segment_name = Constants.SEGMENT_NUM_TO_NAME.get(segment_number, "")
-               if len(segment_name) > 0:
-                  # Preface with a comma if the delimited list isn't empty.
-                  if len(segment_names) > 0:
-                     segment_names += ","
-                  segment_names += segment_name
-
-            meta[gid] = {
-               "strain": safe_trim(rec.get("strain")),
-               "subtype": safe_trim(rec.get("subtype")),
-               "segment": segment_names,
-               "collection_date": self.normalize_collection_date(rec.get("collection_date")),
-            }"""
-
+          
          sys.stdout.write(f"Fetched metadata for {len(genome_ids)} genomes and {valid_genomes} were valid.\n")
 
       except Exception as e:
@@ -1319,43 +1287,6 @@ class TreeSortRunner:
       return
    
 
-   """def filter_ids_by_segments(self, genome_ids: List[str], meta: Dict[str, Dict[str, str]]) -> List[str]:
-      ""
-      Keep only genomes whose metadata.segment(s) are in requested_segments.
-      ""
-      if requested_segments is None or len(requested_segments) < 1:
-         # If empty means "all segments" in TreeSort, then don't filter.
-         return genome_ids
-
-      # TEST
-      sys.stdout.write(f"requested_segments = {str(requested_segments)}\n")
-
-      kept: List[str] = []
-
-      for gid in genome_ids:
-         m = meta.get(gid)
-         if not m:
-            continue
-
-         segments = safe_trim(m.get("segment"))
-         if segments is None:
-            continue
-
-         # Remove whitespace and convert to uppercase.
-         segments = segments.replace(" ", "").upper()
-
-         sys.stdout.write(f"genome segments: {segments}\n")
-
-         segment_list = segments.split(",")
-         if not set(segment_list).issubset(set(requested_segments)):
-            # TODO: We could gracefully handle this by filtering the genome's FASTA later on.
-            continue
-
-         kept.append(gid)
-
-      return kept"""
-
-
    # Determine the source of the FASTA input file and prepare it for use.
    def prepare_input_file(self) -> bool:
 
@@ -1471,7 +1402,6 @@ class TreeSortRunner:
             segment_name = Constants.SEGMENT_NUM_TO_NAME.get(str(segment_num)) or ""
 
             if segment_name not in self.segments:
-               sys.stderr.write(f"Skipping the sequence for segment {segment_name} in genome {genome.genome_id}\n")
                skip_sequence = True
                continue
 
