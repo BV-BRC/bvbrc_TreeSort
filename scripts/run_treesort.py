@@ -231,6 +231,7 @@ class GenomeMetadata:
          raise ValueError(f"Invalid strain for genome {self.genome_id}\n")
       
       self.subtype = safe_trim(subtype)
+
       # dmd 10/13/26: This is empty in what appear to be valid genomes and I think subtype is 
       # only used in the strain's name in the FASTA header.
       #if self.subtype is None or len(self.subtype) < 1:
@@ -240,7 +241,7 @@ class GenomeMetadata:
          raise ValueError(f"Invalid segments for genome {genome_id}\n")
 
       # Convert segment numbers to names.
-      self.segments = TreeSortRunner.convert_segment_numbers_to_names(segments)
+      self.segments = TreeSortRunner.convert_segments_to_names(segments)
 
 
 # The contents of the jobdesc.json file.
@@ -414,18 +415,23 @@ class TreeSortRunner:
 
 
    @staticmethod
-   def convert_segment_numbers_to_names(segment_numbers: list[str]):
-      """ Convert a list of numeric segments to segment names. """
+   def convert_segments_to_names(segments: list[str]):
+      """ Convert numbers, names, or labels like "PB2 (1)" to valid segment names. """
       segment_names = []
       
-      for segment_number in segment_numbers:
-         segment_number = safe_trim(segment_number)
-         if len(segment_number) < 1:
+      for segment in segments:
+         segment = safe_trim(segment).upper()
+         if len(segment) < 1:
             continue
 
-         # Convert numeric segment to canonical name
-         segment_name = Constants.SEGMENT_NUM_TO_NAME.get(segment_number, "")
-         if len(segment_name) > 0:
+         # Extract the name from a label with a parenthesized segment number.
+         match = re.fullmatch(r"([A-Z][A-Z0-9]*)\s*\([1-8]\)", segment)
+         if match:
+            segment = match.group(1)
+
+         # Convert numeric segments and validate the resulting name.
+         segment_name = Constants.SEGMENT_NUM_TO_NAME.get(segment, segment)
+         if segment_name in Constants.VALID_SEGMENTS:
             segment_names.append(segment_name)
 
       return segment_names
